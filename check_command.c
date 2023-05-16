@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_command.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/16 13:13:56 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/17 02:03:30 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,6 +207,19 @@ t_cmd_info	**set_cmd_list(t_table *table, t_tmp *list)
 	return (tmp);
 }
 
+int	check_unexpect_operator(t_tmp **list, t_table *table)
+{
+	*list = (*list)->next;
+	if (!*list)
+	{
+		table->syntax_error = 2;
+			return (1);
+	}
+	if (check_operator(get_cmd_type((*list)->data)))
+		table->syntax_error = 1;
+	return (0);
+}
+
 t_cmd_info	**syntax_interpretation(t_tmp *list, t_table *table)
 {
 	t_cmd_info	**tmp;
@@ -219,18 +232,16 @@ t_cmd_info	**syntax_interpretation(t_tmp *list, t_table *table)
 	{
 		type = get_cmd_type(list->data);
 		if (check_operator(type) == 1)
-		{	
-			if (!list->next || check_operator(get_cmd_type(list->next->data)))
-			{
-				table->syntax_error = 1;
-				return (NULL);
-			}
-			list = list->next;
-		}
+			if (check_unexpect_operator(&list, table))
+				break ;
 		if (type != pipe_)
 			push_cmd(&tmp[i], list->data, type);
 		else
+		{
+			if (!list->next)
+				table->syntax_error = 1;
 			i++;
+		}
 		list = list->next;
 	}
 	return (tmp);
@@ -282,10 +293,10 @@ t_cmd_info	**parse(char *command_line, t_table *table)
 		return (NULL);
 	}
 	node = syntax_interpretation(list, table);
-	if (table->syntax_error)
+	if (table->syntax_error == 1)
 	{
 		table->exit_status = return_error("minishell: syntax error\n", 258);
-		return (NULL);
+		//return (NULL);
 	}
 	replace_argv_to_command(node);
 	int i = 0;
@@ -313,6 +324,8 @@ t_cmd_info	**parse(char *command_line, t_table *table)
 		node[i] = head;
 		i++;
 	}
+	if (table->syntax_error == 2)
+		table->exit_status = return_error("minishell: syntax error\n", 258);
 	return (node);
 	// 명령어 상태를 점검합니다 --> 만일 | > >> 뒤에 unexpect인자가 들어올 경우 syntax flag를 사용하여 에러처리 후 탈출합니다
 	//check_operator(cmd, table);
@@ -345,7 +358,7 @@ int	main(int ac, char *av[], char *env[])
 	//ft_putstr_fd("\x1b[1A", STDOUT_FILENO);
 	ft_putstr_fd("\033[2D", STDOUT_FILENO);
 	ft_putstr_fd("exit\n", STDOUT_FILENO);
-	atexit(leaks);
+	//atexit(leaks);
 	exit (0);
 }
 
