@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_command.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/17 02:03:30 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/17 16:22:21 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,8 @@ t_tmp *make_cmd_list(char **tmp1, t_table *table)
 
 	i = -1;
 	list = NULL;
+	if (!tmp1)
+		return (NULL);
 	while (tmp1[++i])
 	{
 		if (tmp1[i][0] == '\"' || tmp1[i][0] == '\'')
@@ -146,6 +148,12 @@ int	get_cmd_type(char *cmd)
 		return (pipe_);
 	if (!ft_strncmp("-", cmd, 1))
 		return (option);
+	if (!ft_strcmp("(", cmd))
+		return (unexpect_token);
+	if (!ft_strcmp(";", cmd))
+		return (unexpect_token);
+	if (!ft_strcmp(")", cmd))
+		return (unexpect_token);
 	return (argv);
 }
 
@@ -227,6 +235,8 @@ t_cmd_info	**syntax_interpretation(t_tmp *list, t_table *table)
 	int			i;
 
 	i = 0;
+	if (!list)
+		return (NULL);
 	tmp = set_cmd_list(table, list);
 	while (list)
 	{
@@ -253,6 +263,8 @@ void	replace_argv_to_command(t_cmd_info **cmd)
 	t_cmd_info	*head;
 
 	i = 0;
+	if (!cmd)
+		return ;
 	while (cmd[i])
 	{
 		head = cmd[i];
@@ -270,36 +282,10 @@ void	replace_argv_to_command(t_cmd_info **cmd)
 	}
 }
 
-t_cmd_info	**parse(char *command_line, t_table *table)
+void	print_cmd(t_cmd_info **node)
 {
-	char		**tmp1;
-	t_tmp		*list;
-	t_cmd_info	**node;
-	t_cmd_info	*head;
-
-	tmp1 = ft_split_quote(command_line, " ", table);
-	table->split_tmp = tmp1;
-	if (table->syntax_error)
-	{
-		free_split(tmp1);
-		table->exit_status = return_error("minishell: syntax error\n", 258);
-		return (NULL);
-	}
-	list = make_cmd_list(tmp1, table);
-	table->node = list;
-	if (!list)
-	{
-		table->exit_status = return_error("minishell: syntax error\n", 258);
-		return (NULL);
-	}
-	node = syntax_interpretation(list, table);
-	if (table->syntax_error == 1)
-	{
-		table->exit_status = return_error("minishell: syntax error\n", 258);
-		//return (NULL);
-	}
-	replace_argv_to_command(node);
 	int i = 0;
+	t_cmd_info	*head;
 	char	*arr[100] = {
 		"command",
 		"option",
@@ -324,8 +310,75 @@ t_cmd_info	**parse(char *command_line, t_table *table)
 		node[i] = head;
 		i++;
 	}
-	if (table->syntax_error == 2)
+}
+
+void	init_here_doc_data(t_av *t, char *limits, char **av)
+{
+	int		fd;
+	char	*line;
+
+	fd = open("/tmp/sh-thd-1641928925", \
+	O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, 0600);
+	t->infile = dup(fd);
+	t->tmp = ft_strjoin(limits, "\n");
+	while (1)
+	{
+		line = readline(NULL);
+		if (ft_strcmp(line, t->tmp) == 0)
+			break ;
+		write(t->infile, line, ft_strlen(line));
+		free(line);
+	}
+	free(t->tmp);
+	close(t->infile);
+	t->infile = open("/tmp/sh-thd-1641928925", O_RDONLY);
+	close(fd);
+	unlink("/tmp/sh-thd-1641928925");
+	t->outfile = open(av[t->ac - 1], O_RDWR | O_CREAT | O_APPEND, 0644);
+	if (t->outfile == -1)
+		exit_error("Error outfile", 1, EXIT_FAILURE);
+}
+
+void	check_in_out_file(t_cmd_info **node)
+{
+	int i;
+	t_cmd_info	*head;
+
+	i = 0;
+	while (node[i])
+	{
+		head = node[i];
+		while (node[i])
+		{
+			if (node[i]->type == redict_in)
+			if (node[i]->type == redict_out)
+			if (node[i]->type == dict_in)
+			if (node[i]->type == dict_out)
+			node[i] = node[i]->next;
+		}
+		node[i] = head;
+		i++;
+	}
+}
+
+t_cmd_info	**parse(char *command_line, t_table *table)
+{
+	char		**tmp1;
+	t_tmp		*list;
+	t_cmd_info	**node;
+
+	tmp1 = ft_split_quote(command_line, " ", table);
+	table->split_tmp = tmp1;
+	list = make_cmd_list(tmp1, table);
+	table->node = list;
+	node = syntax_interpretation(list, table);
+	replace_argv_to_command(node);
+	if (table->syntax_error)
+	{
 		table->exit_status = return_error("minishell: syntax error\n", 258);
+		return (NULL);
+	}
+	check_in_out_file(node);
 	return (node);
 	// 명령어 상태를 점검합니다 --> 만일 | > >> 뒤에 unexpect인자가 들어올 경우 syntax flag를 사용하여 에러처리 후 탈출합니다
 	//check_operator(cmd, table);
