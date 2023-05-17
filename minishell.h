@@ -16,6 +16,7 @@ typedef struct	s_table
 {
 	char			**envp;
 	int				exit_status;
+	int				exit_flag;
 	int				syntax_error;
 	int				cmd_count;
 	struct s_tmp	*node;
@@ -48,7 +49,8 @@ typedef enum s_type
 	dict_in,
 	dquoute,
 	quote,
-	pipe_
+	pipe_,
+	unexpect_token,
 }	t_type;
 
 char	**ft_split_quote(char const *s, char *c, t_table *table);
