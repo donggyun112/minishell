@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/19 01:19:45 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/19 02:03:53 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -375,10 +375,35 @@ void	errno_print(const char *str)
 	perror(str);
 }
 
+void	close_file(t_cmd_info *node, t_fd_status *fd)
+{
+	if (node->type == redict_in)
+	{
+		if (fd->in != 0)
+			close(fd->in);
+	}
+	if (node->type == dict_in && fd->status != -1)
+	{
+		if (fd->in != 0)
+			close(fd->in);
+	}
+	if (node->type == redict_out && fd->status != -1)
+	{
+		if (fd->out != 1)
+			close(fd->out);
+	}
+	if (node->type == dict_out && fd->status != -1)
+	{
+		if (fd->out != 1)
+			close(fd->out);
+	}
+}
+
 void	open_in_out_file(t_cmd_info **node, t_fd_status *fd, int i)
 {
 	while (node[i])
 	{
+		close_file(node[i], fd);
 		if (node[i]->type == redict_in)
 			fd->in = init_here_doc_data(node[i]->data);
 		if (node[i]->type == dict_in && fd->status != -1)
@@ -434,7 +459,8 @@ int	count_command(t_cmd_info *node)
 	while (node)
 	{
 		if (node->type == command || node->type  == option\
-		|| node->type == argv)
+		|| node->type == argv || node->type == dquoute\
+		|| node->type == quote)
 			i++;
 		node = node->next;
 	}
@@ -468,15 +494,16 @@ void	make_command(t_command *cmd_list, t_cmd_info **node)
 	t_cmd_info	*head;
 
 	i = 0;
-	count = 0;
 	while (node[i])
 	{
 		head = node[i];
 		cmd_list->cmd = set_cmd(node[i]);
+		count = 0;
 		while (node[i])
 		{
 			if (node[i]->type == command || node[i]->type  == option\
-			|| node[i]->type == argv)
+			|| node[i]->type == argv || node[i]->type == dquoute\
+			|| node[i]->type == quote)
 			{
 				cmd_list->cmd[count] = ft_strdup(node[i]->data);
 				count++;
