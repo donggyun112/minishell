@@ -22,6 +22,7 @@ typedef struct	s_table
 	struct s_tmp	*node;
 	char			**split_tmp;
 	char			**split_tmp2;
+	int				fd_status;
 }	t_table;
 
 typedef struct s_cmd_info
@@ -36,6 +37,22 @@ typedef struct s_tmp
 	char			*data;
 	struct s_tmp	*next;
 }	t_tmp;
+
+typedef struct s_command
+{
+	int					infile;
+	int					outfile;
+	char				**cmd;
+	struct s_command	*next;
+}	t_command;
+
+typedef struct s_fd_status
+{
+	int		status;
+	int		in;
+	int		out;
+	char	*error_file;
+}	t_fd_status;
 
 typedef enum s_type
 {
@@ -52,6 +69,8 @@ typedef enum s_type
 	pipe_,
 	unexpect_token,
 }	t_type;
+
+
 
 char	**ft_split_quote(char const *s, char *c, t_table *table);
 static int	check_quote(const char *s);

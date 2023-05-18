@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_command.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/17 16:22:21 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/19 01:19:45 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -312,50 +312,178 @@ void	print_cmd(t_cmd_info **node)
 	}
 }
 
-void	init_here_doc_data(t_av *t, char *limits, char **av)
+int	init_here_doc_data(char *limits)
 {
 	int		fd;
 	char	*line;
+	int		infile;
 
 	fd = open("/tmp/sh-thd-1641928925", \
 	O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, 0600);
-	t->infile = dup(fd);
-	t->tmp = ft_strjoin(limits, "\n");
+	infile = dup(fd);
 	while (1)
 	{
-		line = readline(NULL);
-		if (ft_strcmp(line, t->tmp) == 0)
+		line = readline("> ");
+		if (!line || ft_strcmp(line, limits) == 0)
+		{
+			ft_putstr_fd("\033[2D", STDOUT_FILENO);
 			break ;
-		write(t->infile, line, ft_strlen(line));
+		}
+		write(infile, line, ft_strlen(line));
 		free(line);
 	}
-	free(t->tmp);
-	close(t->infile);
-	t->infile = open("/tmp/sh-thd-1641928925", O_RDONLY);
+	close(infile);
+	infile = open("/tmp/sh-thd-1641928925", O_RDONLY);
 	close(fd);
 	unlink("/tmp/sh-thd-1641928925");
-	t->outfile = open(av[t->ac - 1], O_RDWR | O_CREAT | O_APPEND, 0644);
-	if (t->outfile == -1)
-		exit_error("Error outfile", 1, EXIT_FAILURE);
+	return (infile);
 }
 
-void	check_in_out_file(t_cmd_info **node)
+void	push_fd(t_command **cmd_list, int infile, int outfile)
+{
+	t_command	*tmp;
+	t_command	*head;
+
+	tmp = (t_command *)malloc(sizeof(t_command));
+	tmp->infile = infile;
+	tmp->outfile = outfile;
+	tmp->next = NULL;
+	if (!*cmd_list)
+		*cmd_list = tmp;
+	else
+	{
+		head = *cmd_list;
+		while (head->next)
+			head = head->next;
+		head->next = tmp;
+	}
+}
+
+void	replace_fd(t_command *cmd_list, int infile, int outfile)
+{
+	while (cmd_list->next)
+		cmd_list = cmd_list->next;
+	if (infile != -1)
+		cmd_list->infile = infile;
+	if (outfile != -1)
+		cmd_list->outfile = outfile;
+}
+
+void	errno_print(const char *str)
+{
+	ft_putstr_fd("minishell: ", 2);
+	perror(str);
+}
+
+void	open_in_out_file(t_cmd_info **node, t_fd_status *fd, int i)
+{
+	while (node[i])
+	{
+		if (node[i]->type == redict_in)
+			fd->in = init_here_doc_data(node[i]->data);
+		if (node[i]->type == dict_in && fd->status != -1)
+		{
+			fd->in = open(node[i]->data, O_RDONLY);
+			if (fd->in == -1)
+			{
+				fd->error_file = node[i]->data;
+				fd->status = -1;
+			}
+		}
+		if (node[i]->type == redict_out && fd->status != -1)
+			fd->out = open(node[i]->data, O_RDWR | O_CREAT | O_APPEND, 0644);
+		if (node[i]->type == dict_out && fd->status != -1)
+			fd->out = open(node[i]->data, O_RDWR | O_CREAT | O_TRUNC, 0644);
+		node[i] = node[i]->next;
+	}
+}
+
+t_command	*check_in_out_file(t_cmd_info **node)
 {
 	int i;
+	t_fd_status	fd;
+	t_cmd_info	*head;
+	t_command	*cmd_list;
+
+	i = -1;
+	cmd_list = NULL;
+	fd.status = 0;
+	while (node[++i])
+	{
+		head = node[i];
+		fd.in = 0;
+		fd.out = 1;
+		push_fd(&cmd_list, 0, 1);
+		open_in_out_file(node, &fd, i);
+		if (fd.status == -1)
+		{
+			errno_print(fd.error_file);
+			fd.status = 0;
+		}
+		replace_fd(cmd_list, fd.in, fd.out);
+		node[i] = head;
+	}
+	return (cmd_list);
+}
+
+int	count_command(t_cmd_info *node)
+{
+	int	i;
+
+	i = 0;
+	while (node)
+	{
+		if (node->type == command || node->type  == option\
+		|| node->type == argv)
+			i++;
+		node = node->next;
+	}
+	return (i);
+}
+
+char	**set_cmd(t_cmd_info *node)
+{
+	int		size;
+	char	**arr;
+	int		i;
+	size = count_command(node);
+	if (size == 0)
+		return (NULL);
+	else
+		arr = (char **)malloc(sizeof(char *) * (size + 1));
+	i = 0;
+	while (i <= size)
+	{
+		arr[i] = NULL;
+		i++;
+	}
+	return (arr);
+}
+
+void	make_command(t_command *cmd_list, t_cmd_info **node)
+{
+	int	i;
+	int	count;
+	int	size;
 	t_cmd_info	*head;
 
 	i = 0;
+	count = 0;
 	while (node[i])
 	{
 		head = node[i];
+		cmd_list->cmd = set_cmd(node[i]);
 		while (node[i])
 		{
-			if (node[i]->type == redict_in)
-			if (node[i]->type == redict_out)
-			if (node[i]->type == dict_in)
-			if (node[i]->type == dict_out)
+			if (node[i]->type == command || node[i]->type  == option\
+			|| node[i]->type == argv)
+			{
+				cmd_list->cmd[count] = ft_strdup(node[i]->data);
+				count++;
+			}
 			node[i] = node[i]->next;
 		}
+		cmd_list = cmd_list->next;
 		node[i] = head;
 		i++;
 	}
@@ -366,6 +494,7 @@ t_cmd_info	**parse(char *command_line, t_table *table)
 	char		**tmp1;
 	t_tmp		*list;
 	t_cmd_info	**node;
+	t_command	*cmd_list;
 
 	tmp1 = ft_split_quote(command_line, " ", table);
 	table->split_tmp = tmp1;
@@ -378,7 +507,22 @@ t_cmd_info	**parse(char *command_line, t_table *table)
 		table->exit_status = return_error("minishell: syntax error\n", 258);
 		return (NULL);
 	}
-	check_in_out_file(node);
+	cmd_list = check_in_out_file(node);
+	make_command(cmd_list, node);
+	while (cmd_list)
+	{
+		printf("infile : %d outfile %d\n", cmd_list->infile, cmd_list->outfile);
+		if (cmd_list->cmd != NULL)
+		{
+			for (int x = 0; cmd_list->cmd[x]; x++)
+			{
+				printf("%s ", cmd_list->cmd[x]);
+			}
+		}
+		printf("\n");
+		cmd_list = cmd_list->next;
+	}
+	//print_cmd(node);
 	return (node);
 	// 명령어 상태를 점검합니다 --> 만일 | > >> 뒤에 unexpect인자가 들어올 경우 syntax flag를 사용하여 에러처리 후 탈출합니다
 	//check_operator(cmd, table);
