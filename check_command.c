@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/19 16:26:13 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/19 17:34:39 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,7 @@ int	get_cmd_type(char *cmd)
 	if (!ft_strcmp("<", cmd))
 		return (dict_in);
 	if (!ft_strncmp("\"", cmd, 1))
-		return (dquoute);
+		return (dquote);
 	if (!ft_strncmp("\'", cmd, 1))
 		return (quote);
 	if (!ft_strcmp("|", cmd))
@@ -221,7 +221,7 @@ int	check_unexpect_operator(t_tmp **list, t_table *table)
 	if (!*list)
 	{
 		table->syntax_error = 2;
-			return (1);
+		return (1);
 	}
 	if (check_operator(get_cmd_type((*list)->data)))
 		table->syntax_error = 1;
@@ -295,7 +295,7 @@ void	print_cmd(t_cmd_info **node)
 		"redict_in",
 		"dict_out",
 		"dict_in",
-		"dquoute",
+		"dquote",
 		"quote",
 		"pipe"
 	};
@@ -460,7 +460,7 @@ int	count_command(t_cmd_info *node)
 	while (node)
 	{
 		if (node->type == command || node->type  == option\
-		|| node->type == argv || node->type == dquoute\
+		|| node->type == argv || node->type == dquote\
 		|| node->type == quote)
 			i++;
 		node = node->next;
@@ -503,7 +503,7 @@ void	make_command(t_command *cmd_list, t_cmd_info **node)
 		while (node[i])
 		{
 			if (node[i]->type == command || node[i]->type  == option\
-			|| node[i]->type == argv || node[i]->type == dquoute\
+			|| node[i]->type == argv || node[i]->type == dquote\
 			|| node[i]->type == quote)
 			{
 				cmd_list->cmd[count] = ft_strdup(node[i]->data);
@@ -644,7 +644,7 @@ void	remove_dquote(t_cmd_info **node)
 		head = node[i];
 		while (node[i])
 		{
-			if (node[i]->type == dquoute)
+			if (node[i]->type == dquote)
 			{
 				tmp = node[i]->data;
 				node[i]->data = ft_substr(node[i]->data, 1, ft_strlen(node[i]->data) - 2);
@@ -704,6 +704,64 @@ t_heredoc_fd	*check_heredoc(t_cmd_info **node)
 	return (h_fd);
 }
 
+void	check_syntax_error(t_cmd_info **node, t_table *table)
+{
+	int			i;
+	int			j;
+	t_cmd_info	*head;
+
+	i = 0;
+	if (!node)
+		return ;
+	while (node[i])
+	{
+		head = node[i];
+		while (node[i])
+		{
+			if (node[i]->type != dquote && node[i]->type != quote)
+			{
+				j = 0;
+				while (node[i]->data[j])
+				{
+					if (node[i]->data[j] == ')' || node[i]->data[j] == '(' \
+					|| node[i]->data[j] == ';')
+					{
+						table->syntax_error = 1;
+						return ;
+					}
+					j++;
+				}
+			}
+			node[i] = node[i]->next;
+		}
+		node[i] = head;
+		i++;
+	}
+}
+
+void	print_cmd2(t_command *cmd_list)
+{
+	while (cmd_list)
+	{
+		printf("infile : %d outfile %d\n", cmd_list->infile, cmd_list->outfile);
+		if (cmd_list->cmd != NULL)
+		{
+			for (int x = 0; cmd_list->cmd[x]; x++)
+			{
+				printf("%s \n", cmd_list->cmd[x]);
+			}
+		}
+		printf("\n");
+		cmd_list = cmd_list->next;
+	}
+}
+
+void	*error_clear(t_table *table)
+{
+	table->exit_status = return_error("minishell: syntax error\n", 258);
+	return (NULL);
+}
+
 t_command	*parse(char *command_line, t_table *table)
 {
 	char			**tmp1;
@@ -713,50 +771,31 @@ t_command	*parse(char *command_line, t_table *table)
 	t_heredoc_fd	*h_fd;
 
 	tmp1 = ft_split_quote(command_line, " ", table);
-	if (table->syntax_error)
-	{
-		table->exit_status = return_error("minishell: syntax error\n", 258);
-		return (NULL);
-	}
 	table->split_tmp = tmp1;
-	list = make_cmd_list(tmp1, table);
-	table->node = list;
-	node = syntax_interpretation(list, table);
 	if (table->syntax_error)
-	{
-		table->exit_status = return_error("minishell: syntax error\n", 258);
-		return (NULL);
-	}
+		return (error_clear(table));
+	list = make_cmd_list(tmp1, table);
+	node = syntax_interpretation(list, table);
+	check_syntax_error(node, table);
+	table->node = list;
+	table->node2 = node;
+	if (table->syntax_error)
+		return (error_clear(table));
 	replace_argv_to_command(node);
 	remove_dquote(node);
 	replace_environment_variable(node);
 	h_fd = check_heredoc(node);
 	cmd_list = check_in_out_file(node, h_fd);
-	make_command(cmd_list, node);
-	while (cmd_list)
-	{
-		printf("infile : %d outfile %d\n", cmd_list->infile, cmd_list->outfile);
-		if (cmd_list->cmd != NULL)
-		{
-			for (int x = 0; cmd_list->cmd[x]; x++)
-			{
-				printf("%s ", cmd_list->cmd[x]);
-			}
-		}
-		printf("\n");
-		cmd_list = cmd_list->next;
-	}
-	table->node2 = node;
 	table->node3 = h_fd;
-	//print_cmd(node);
+	make_command(cmd_list, node);
+	print_cmd(node);
+	print_cmd2(cmd_list);
 	return (cmd_list);
 	// 명령어 상태를 점검합니다 --> 만일 | > >> 뒤에 unexpect인자가 들어올 경우 syntax flag를 사용하여 에러처리 후 탈출합니다
 	//check_operator(cmd, table);
 	// 쿼터체크
 	// 명령어 토근화
 }
-
-
 
 int	main(int ac, char *av[], char *env[])
 {

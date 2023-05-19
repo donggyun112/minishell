@@ -72,7 +72,7 @@ typedef enum s_type
 	redict_in,
 	dict_out,
 	dict_in,
-	dquoute,
+	dquote,
 	quote,
 	pipe_,
 	unexpect_token,
