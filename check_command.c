@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/19 01:19:45 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/19 03:43:23 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -375,10 +375,35 @@ void	errno_print(const char *str)
 	perror(str);
 }
 
+void	close_file(t_cmd_info *node, t_fd_status *fd)
+{
+	if (node->type == redict_in)
+	{
+		if (fd->in != 0)
+			close(fd->in);
+	}
+	if (node->type == dict_in && fd->status != -1)
+	{
+		if (fd->in != 0)
+			close(fd->in);
+	}
+	if (node->type == redict_out && fd->status != -1)
+	{
+		if (fd->out != 1)
+			close(fd->out);
+	}
+	if (node->type == dict_out && fd->status != -1)
+	{
+		if (fd->out != 1)
+			close(fd->out);
+	}
+}
+
 void	open_in_out_file(t_cmd_info **node, t_fd_status *fd, int i)
 {
 	while (node[i])
 	{
+		close_file(node[i], fd);
 		if (node[i]->type == redict_in)
 			fd->in = init_here_doc_data(node[i]->data);
 		if (node[i]->type == dict_in && fd->status != -1)
@@ -434,7 +459,8 @@ int	count_command(t_cmd_info *node)
 	while (node)
 	{
 		if (node->type == command || node->type  == option\
-		|| node->type == argv)
+		|| node->type == argv || node->type == dquoute\
+		|| node->type == quote)
 			i++;
 		node = node->next;
 	}
@@ -468,15 +494,16 @@ void	make_command(t_command *cmd_list, t_cmd_info **node)
 	t_cmd_info	*head;
 
 	i = 0;
-	count = 0;
 	while (node[i])
 	{
 		head = node[i];
 		cmd_list->cmd = set_cmd(node[i]);
+		count = 0;
 		while (node[i])
 		{
 			if (node[i]->type == command || node[i]->type  == option\
-			|| node[i]->type == argv)
+			|| node[i]->type == argv || node[i]->type == dquoute\
+			|| node[i]->type == quote)
 			{
 				cmd_list->cmd[count] = ft_strdup(node[i]->data);
 				count++;
@@ -484,6 +511,77 @@ void	make_command(t_command *cmd_list, t_cmd_info **node)
 			node[i] = node[i]->next;
 		}
 		cmd_list = cmd_list->next;
+		node[i] = head;
+		i++;
+	}
+}
+
+int	env_len(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i + 1] && str[i] != 32 && !(str[i] > 9 && str[i] < 13))
+		i++;
+	return (i);	
+}
+
+char	*replace_string(char *base, int len)
+{
+	int	i;
+	char	*tmp1;
+	char	*tmp2;
+	char	*tmp3;
+	char	*ret;
+
+	i = 0;
+	tmp1 = ft_strchr(base, '$');
+	tmp1 = ft_substr(tmp1 + 1, 0, len);
+	tmp1 = getenv(ft_strjoin(tmp1, "="));
+	tmp2 = ft_substr(base + 1, 0, ft_strchr(base, '$') - base - 1);
+	tmp3 = ft_substr(ft_strchr(base, '$') + len + 1, 0, ft_strlen(ft_strchr(base, '$') + len) - 2);
+	ret = ft_strjoin(tmp2, tmp1);
+	ret = ft_strjoin(ret, tmp3);
+	return (ret);
+}
+
+void	replace_environment_variable(t_cmd_info	**node)
+{
+	int	i;
+	int	j;
+	char		*tmp;
+	char		*tmp2;
+	t_cmd_info	*head;
+
+	i = 0;
+	j = 0;
+	while (node[i])
+	{
+		head = node[i];
+		while (node[i])
+		{
+			if (node[i]->type == dquoute)
+			{
+				tmp = ft_strchr(node[i]->data, '$');
+				if (tmp)
+				{
+					j = env_len(tmp + 1);
+					if (j != 0)
+						node[i]->data = replace_string(node[i]->data, j);
+				}
+			}
+			else if (strcmp("$", node[i]->data))
+			{
+				if (!strncmp("$", node[i]->data, 1))
+				{
+					tmp = node[i]->data;
+					tmp = getenv((ft_strjoin(tmp + 1, "=")));
+					free(node[i]->data);
+					node[i]->data = tmp;
+				}
+			}
+			node[i] = node[i]->next;
+		}
 		node[i] = head;
 		i++;
 	}
@@ -502,6 +600,7 @@ t_cmd_info	**parse(char *command_line, t_table *table)
 	table->node = list;
 	node = syntax_interpretation(list, table);
 	replace_argv_to_command(node);
+	replace_environment_variable(node);
 	if (table->syntax_error)
 	{
 		table->exit_status = return_error("minishell: syntax error\n", 258);

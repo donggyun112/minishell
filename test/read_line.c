@@ -11,8 +11,9 @@ int main(void)
 {
 	char *arr[10];
 
-	arr[0] = "cat";
-	arr[1] = "a";
-	arr[2] = NULL;
-	execve("/bin/cat", arr, NULL);
+	arr[0] = "ls";
+	arr[1] = "\"asd\"";
+	arr[2] = "-al";
+	arr[3] = NULL;
+	execve("/bin/ls", arr, NULL);
 }
