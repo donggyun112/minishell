@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_command.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/19 03:43:23 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/19 16:26:13 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -363,10 +363,8 @@ void	replace_fd(t_command *cmd_list, int infile, int outfile)
 {
 	while (cmd_list->next)
 		cmd_list = cmd_list->next;
-	if (infile != -1)
-		cmd_list->infile = infile;
-	if (outfile != -1)
-		cmd_list->outfile = outfile;
+	cmd_list->infile = infile;
+	cmd_list->outfile = outfile;
 }
 
 void	errno_print(const char *str)
@@ -399,13 +397,16 @@ void	close_file(t_cmd_info *node, t_fd_status *fd)
 	}
 }
 
-void	open_in_out_file(t_cmd_info **node, t_fd_status *fd, int i)
+void	open_in_out_file(t_cmd_info **node, t_fd_status *fd, int i, t_heredoc_fd **h_fd)
 {
 	while (node[i])
 	{
 		close_file(node[i], fd);
 		if (node[i]->type == redict_in)
-			fd->in = init_here_doc_data(node[i]->data);
+		{
+			fd->in = (*h_fd)->fd;
+			*h_fd = (*h_fd)->next;
+		}
 		if (node[i]->type == dict_in && fd->status != -1)
 		{
 			fd->in = open(node[i]->data, O_RDONLY);
@@ -423,7 +424,7 @@ void	open_in_out_file(t_cmd_info **node, t_fd_status *fd, int i)
 	}
 }
 
-t_command	*check_in_out_file(t_cmd_info **node)
+t_command	*check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd)
 {
 	int i;
 	t_fd_status	fd;
@@ -439,7 +440,7 @@ t_command	*check_in_out_file(t_cmd_info **node)
 		fd.in = 0;
 		fd.out = 1;
 		push_fd(&cmd_list, 0, 1);
-		open_in_out_file(node, &fd, i);
+		open_in_out_file(node, &fd, i, &h_fd);
 		if (fd.status == -1)
 		{
 			errno_print(fd.error_file);
@@ -521,28 +522,83 @@ int	env_len(char *str)
 	int	i;
 
 	i = 0;
-	while (str[i + 1] && str[i] != 32 && !(str[i] > 9 && str[i] < 13))
+	if (!str)
+		return (-1);
+	str = str + 1;
+	while (str[i] && str[i] != 32 && !(str[i] > 9 && str[i] < 13) && str[i] != '$')
 		i++;
 	return (i);	
 }
 
-char	*replace_string(char *base, int len)
+char	*replace_val(t_cmd_info	*node)
 {
-	int	i;
-	char	*tmp1;
+	char	*base;
+	char	*tmp;
 	char	*tmp2;
 	char	*tmp3;
+	char	*head;
+	char	*tail;
+	char	*tar;
 	char	*ret;
+	int		len;
+	int		i;
 
+	base = node->data;
 	i = 0;
-	tmp1 = ft_strchr(base, '$');
-	tmp1 = ft_substr(tmp1 + 1, 0, len);
-	tmp1 = getenv(ft_strjoin(tmp1, "="));
-	tmp2 = ft_substr(base + 1, 0, ft_strchr(base, '$') - base - 1);
-	tmp3 = ft_substr(ft_strchr(base, '$') + len + 1, 0, ft_strlen(ft_strchr(base, '$') + len) - 2);
-	ret = ft_strjoin(tmp2, tmp1);
-	ret = ft_strjoin(ret, tmp3);
-	return (ret);
+	ret = ft_strdup("");
+	while (1)
+	{
+		tmp = ft_strchr(base, '$');
+		if (i == 0 && (!(tmp) || !*(tmp + 1)))
+		{
+			free(ret);
+			return (NULL);
+		}
+		len = env_len(tmp);
+		if (!tmp)
+		{
+			if (len == -1 && (!base || !*base))
+				return (ret);
+			tail = ft_strdup(base);
+			tmp = ft_strjoin(ret, tail);
+			free(tail);
+			free(ret);
+			return (tmp);
+		}
+		head = ft_substr(base, 0, tmp - base);
+		tar = ft_substr(tmp + 1, 0, len);
+		if (len != 0)
+		{
+			tmp2 = ft_strjoin(tar, "=");
+			free(tar);
+			tar = getenv(tmp2);
+			free(tmp2);
+			tmp2 = NULL;
+			if (!tar)
+				tar = ft_strdup("");
+			else
+				tar = ft_strdup(tar);
+		}
+		tmp2 = ft_strjoin(head, tar);
+		free(head);
+		free(tar);
+		tmp3 = ret;
+		ret = ft_strjoin(tmp3, tmp2);
+		free(tmp2);
+		free(tmp3);
+		if (len == 0)
+		{
+			tmp2 = ft_strjoin(ret, "$");
+			free(ret);
+			ret = tmp2;
+		}
+		int z = ft_strlen(tmp);
+		if (z >= len + 1)
+			base = tmp + len + 1;
+		else
+			base = NULL;
+		i++;
+	}
 }
 
 void	replace_environment_variable(t_cmd_info	**node)
@@ -560,25 +616,11 @@ void	replace_environment_variable(t_cmd_info	**node)
 		head = node[i];
 		while (node[i])
 		{
-			if (node[i]->type == dquoute)
+			tmp = replace_val(node[i]);
+			if (tmp)
 			{
-				tmp = ft_strchr(node[i]->data, '$');
-				if (tmp)
-				{
-					j = env_len(tmp + 1);
-					if (j != 0)
-						node[i]->data = replace_string(node[i]->data, j);
-				}
-			}
-			else if (strcmp("$", node[i]->data))
-			{
-				if (!strncmp("$", node[i]->data, 1))
-				{
-					tmp = node[i]->data;
-					tmp = getenv((ft_strjoin(tmp + 1, "=")));
-					free(node[i]->data);
-					node[i]->data = tmp;
-				}
+				free(node[i]->data);
+				node[i]->data = tmp;
 			}
 			node[i] = node[i]->next;
 		}
@@ -587,26 +629,109 @@ void	replace_environment_variable(t_cmd_info	**node)
 	}
 }
 
-t_cmd_info	**parse(char *command_line, t_table *table)
+void	remove_dquote(t_cmd_info **node)
 {
-	char		**tmp1;
-	t_tmp		*list;
-	t_cmd_info	**node;
-	t_command	*cmd_list;
+	int	i;
+	int	j;
+	char		*tmp;
+	char		*tmp2;
+	t_cmd_info	*head;
+
+	i = 0;
+	j = 0;
+	while (node[i])
+	{
+		head = node[i];
+		while (node[i])
+		{
+			if (node[i]->type == dquoute)
+			{
+				tmp = node[i]->data;
+				node[i]->data = ft_substr(node[i]->data, 1, ft_strlen(node[i]->data) - 2);
+				free(tmp);
+			}
+			node[i] = node[i]->next;
+		}
+		node[i] = head;
+		i++;
+	}
+}
+
+void	push_heredoc_fd(t_heredoc_fd **h_fd, int fd)
+{
+	t_heredoc_fd	*tmp;
+	t_heredoc_fd	*head;
+
+	tmp = (t_heredoc_fd *)malloc(sizeof(t_heredoc_fd));
+	tmp->fd = fd;
+	tmp->next = NULL;
+	if (*h_fd == NULL)
+		*h_fd = tmp;
+	else
+	{
+		head = *h_fd;
+		while (head->next)
+			head = head->next;
+		head->next = tmp;
+	}
+}
+
+t_heredoc_fd	*check_heredoc(t_cmd_info **node)
+{
+	int	i;
+	int	fd;
+	t_cmd_info		*head;
+	t_heredoc_fd	*h_fd;
+
+	i = 0;
+	h_fd = NULL;
+	while (node[i])
+	{
+		head = node[i];
+		fd = 0;
+		while (node[i])
+		{
+			if (node[i]->type == redict_in)
+			{
+				fd = init_here_doc_data(node[i]->data);
+				push_heredoc_fd(&h_fd, fd);
+			}
+			node[i] = node[i]->next;
+		}
+		node[i] = head;
+		i++;
+	}
+	return (h_fd);
+}
+
+t_command	*parse(char *command_line, t_table *table)
+{
+	char			**tmp1;
+	t_tmp			*list;
+	t_cmd_info		**node;
+	t_command		*cmd_list;
+	t_heredoc_fd	*h_fd;
 
 	tmp1 = ft_split_quote(command_line, " ", table);
-	table->split_tmp = tmp1;
-	list = make_cmd_list(tmp1, table);
-	table->node = list;
-	node = syntax_interpretation(list, table);
-	replace_argv_to_command(node);
-	replace_environment_variable(node);
 	if (table->syntax_error)
 	{
 		table->exit_status = return_error("minishell: syntax error\n", 258);
 		return (NULL);
 	}
-	cmd_list = check_in_out_file(node);
+	table->split_tmp = tmp1;
+	list = make_cmd_list(tmp1, table);
+	table->node = list;
+	node = syntax_interpretation(list, table);
+	if (table->syntax_error)
+	{
+		table->exit_status = return_error("minishell: syntax error\n", 258);
+		return (NULL);
+	}
+	replace_argv_to_command(node);
+	remove_dquote(node);
+	replace_environment_variable(node);
+	h_fd = check_heredoc(node);
+	cmd_list = check_in_out_file(node, h_fd);
 	make_command(cmd_list, node);
 	while (cmd_list)
 	{
@@ -621,8 +746,10 @@ t_cmd_info	**parse(char *command_line, t_table *table)
 		printf("\n");
 		cmd_list = cmd_list->next;
 	}
+	table->node2 = node;
+	table->node3 = h_fd;
 	//print_cmd(node);
-	return (node);
+	return (cmd_list);
 	// 명령어 상태를 점검합니다 --> 만일 | > >> 뒤에 unexpect인자가 들어올 경우 syntax flag를 사용하여 에러처리 후 탈출합니다
 	//check_operator(cmd, table);
 	// 쿼터체크
@@ -635,6 +762,7 @@ int	main(int ac, char *av[], char *env[])
 {
 	t_table		table;
 	t_cmd_info	**cmd;
+	t_command	*command;
 	char		*input_command;
 
 	table.envp = copy_env(env);  // ---> 환경변수를 복사해둠으로써 팀원도 편하게 자원을 사용할 수 있도록 유도합니다
@@ -646,7 +774,7 @@ int	main(int ac, char *av[], char *env[])
 		if (*input_command != '\0' && !check_whitespace(input_command))
 		{
 			add_history(input_command); // 명령어를 기록하는 과정을 거칩니다 ----> history에 쌓이는 순사가 있을까요??
-			cmd = parse(input_command, &table);
+			command = parse(input_command, &table);
 			//table.exit_status = execute();
 		}
 		free(input_command);
