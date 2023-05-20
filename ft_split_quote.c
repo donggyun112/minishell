@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/19 21:52:40 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/20 18:28:49 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,6 +246,8 @@ char	**ft_split_quote(char const *s, char *c, t_table *table)
 	}
 	table->syntax_error = 0;
 	count = word_count__(s, c, table);
+	if (count == -1)
+		return (NULL);
 	arr = (char **)malloc(sizeof(char *) * (count + 1));
 	if (!arr)
 		return (NULL);

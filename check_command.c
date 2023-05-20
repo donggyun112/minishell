@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/20 14:49:52 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/20 19:12:12 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,6 @@ int	check_whitespace(const char *command)
 	}
 	return (1);
 }
-// 더블쿼터와 = 변수가 처리가됩니다
-// 싱글쿼터  = 변수처리가 되지않습니다
 
 int	return_error(char *msg, int error_code)
 {
@@ -83,6 +81,8 @@ void	*free_split(char **base)
 	int	i;
 
 	i = -1;
+	if (!base)
+		return (NULL);
 	while (base[++i])
 		free(base[i]);
 	free(base);
@@ -245,7 +245,7 @@ t_cmd_info	**syntax_interpretation(t_tmp *list, t_table *table)
 			if (check_unexpect_operator(&list, table))
 				break ;
 		if (type != pipe_)
-			push_cmd(&tmp[i], list->data, type);
+			push_cmd(&tmp[i], ft_strdup(list->data), type);
 		else
 		{
 			if (!list->next)
@@ -327,6 +327,7 @@ int	init_here_doc_data(char *limits)
 		if (!line || ft_strcmp(line, limits) == 0)
 		{
 			ft_putstr_fd("\033[2D", STDOUT_FILENO);
+			free(line);
 			break ;
 		}
 		write(infile, line, ft_strlen(line));
@@ -427,14 +428,16 @@ void	open_in_out_file(t_cmd_info **node, t_fd_status *fd,\
 
 t_command	*check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd)
 {
-	int i;
-	t_fd_status	fd;
-	t_cmd_info	*head;
-	t_command	*cmd_list;
+	int 			i;
+	t_fd_status		fd;
+	t_cmd_info		*head;
+	t_command		*cmd_list;
+	t_heredoc_fd	*tmp;
 
 	i = -1;
 	cmd_list = NULL;
 	fd.status = 0;
+	tmp = h_fd;
 	while (node[++i])
 	{
 		head = node[i];
@@ -450,6 +453,7 @@ t_command	*check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd)
 		replace_fd(cmd_list, fd.in, fd.out);
 		node[i] = head;
 	}
+	h_fd = tmp;
 	return (cmd_list);
 }
 
@@ -542,7 +546,7 @@ int	env_len(char *str, t_table *table)
 		table->syntax_error = 1;
 	return (i);	
 }
-// $"qwe" 는 $와 ""모두 지워버리면됩니다.
+
 void	*free_return_null(t_replace *d)
 {
 	free(d->ret);
@@ -805,6 +809,19 @@ void	*error_clear(t_table *table)
 	return (NULL);
 }
 
+void	free_h_fd(t_heredoc_fd **h_fd)
+{
+	t_heredoc_fd	*head;
+
+	while (*h_fd)
+	{
+		head = (*h_fd)->next;
+		(*h_fd)->fd = 0;
+		free(*h_fd);
+		*h_fd = head;
+	}
+}
+
 t_command	*check_open_file(t_cmd_info **node, t_table *table)
 {
 	t_heredoc_fd	*h_fd;
@@ -812,9 +829,69 @@ t_command	*check_open_file(t_cmd_info **node, t_table *table)
 
 	h_fd = check_heredoc(node);
 	cmd_list = check_in_out_file(node, h_fd);
+	free_h_fd(&h_fd);
 	make_command(cmd_list, node);
-	table->node3 = h_fd;
 	return (cmd_list);
+}
+
+void	free_list(t_tmp	**list)
+{
+	t_tmp	*node;
+
+	if (!*list)
+		return ;
+	while (*list)
+	{
+		node = (*list)->next;
+		if ((*list))
+		{
+			free((*list)->data);
+			free((*list));
+		}
+		*list = node;
+	}
+}
+
+void	free_node(t_cmd_info ***list)
+{
+	t_cmd_info	**head;
+	t_cmd_info	*tmp;
+	t_cmd_info	*tmp2;
+	int	i;
+
+	i = 0;
+	head = *list;
+	if (!*list)
+		return ;
+	while (head[i])
+	{
+		tmp2 = head[i];
+		while (head[i])
+		{
+			tmp = head[i]->next;
+			head[i]->type = 0;
+			free(head[i]->data);
+			free(head[i]);
+			head[i] = tmp;
+		}
+		head[i] = tmp2;
+		i++;
+	}
+	free(head);
+}
+
+void	*syntax_error_split(t_table *table, char ***tmp)
+{
+	free_split(*tmp);
+	return (error_clear(table));
+}
+
+void	*syntax_error__(t_table *table, char ***tmp, t_tmp	**list, t_cmd_info ***node)
+{
+	free_split(*tmp);
+	free_list(list);
+	free_node(node);
+	return (error_clear(table));
 }
 
 t_command	*parse(char *command_line, t_table *table)
@@ -825,35 +902,67 @@ t_command	*parse(char *command_line, t_table *table)
 	t_command		*cmd_list;
 
 	tmp1 = ft_split_quote(command_line, " ", table);
-	table->split_tmp = tmp1;
 	if (table->syntax_error)
-		return (error_clear(table));
+		return (syntax_error_split(table, &tmp1));
 	list = make_cmd_list(tmp1, table);
 	node = syntax_interpretation(list, table);
 	check_syntax_error(node, table);
-	table->node = list;
-	table->node2 = node;
 	if (table->syntax_error)
 		return (error_clear(table));
 	replace_argv_to_command(node);
 	remove_dquote(node);
 	replace_environment_variable(node, table);
 	if (table->syntax_error)
-		return (error_clear(table));
+		return (syntax_error__(table, &tmp1, &list, &node));
 	cmd_list = check_open_file(node, table);
+	free_split(tmp1);
+	free_list(&list);
+	free_node(&node);
 	print_cmd(node);
 	print_cmd2(cmd_list);
 	return (cmd_list);
 }
 
+
+void	free_command(t_command **lst)
+{
+	t_command	*node;
+
+	while ((*lst))
+	{
+		node = (*lst)->next;
+		free_split((*lst)->cmd);
+		(*lst)->infile = 0;
+		(*lst)->outfile = 0;
+		free(*lst);
+		*lst = node;
+	}
+}
+
+void	free_env(t_table *table)
+{
+	char	**env;
+	int		i;
+
+	env = table->envp;
+	i = 0;
+	while (env[i])
+	{
+		free(env[i]);
+		i++;
+	}
+	free(env);
+}
+
 int	main(int ac, char *av[], char *env[])
 {
 	t_table		table;
+	t_trash		*tmp;
 	t_cmd_info	**cmd;
 	t_command	*command;
 	char		*input_command;
 
-	//atexit(leaks);
+	tmp = NULL;
 	table.envp = copy_env(env);  // ---> 환경변수를 복사해둠으로써 팀원도 편하게 자원을 사용할 수 있도록 유도합니다
 	while (ac && av)
 	{
@@ -865,14 +974,15 @@ int	main(int ac, char *av[], char *env[])
 			add_history(input_command); // 명령어를 기록하는 과정을 거칩니다 ----> history에 쌓이는 순사가 있을까요??
 			command = parse(input_command, &table);
 			//table.exit_status = execute();
+			free_command(&command);
 		}
 		free(input_command);
 	}
-	//ft_putstr_fd("\x1b[1A", STDOUT_FILENO);
+	free_env(&table);
+	atexit(leaks);
 	ft_putstr_fd("\033[2D", STDOUT_FILENO);
 	ft_putstr_fd("exit\n", STDOUT_FILENO);
-	//atexit(leaks);
-	exit (0);
+	return (0);
 }
 
 // >> , > 무조건 뒤에 인자가 와야함

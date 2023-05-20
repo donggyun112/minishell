@@ -23,8 +23,8 @@ typedef struct	s_table
 	struct s_cmd_info	**node2;
 	struct s_heredoc_fd	*node3;
 	char				**split_tmp;
-	char				**split_tmp2;
 	int					fd_status;
+	struct s_table		*next;
 }	t_table;
 
 typedef struct s_cmd_info
@@ -53,6 +53,12 @@ typedef struct s_command
 	char				**cmd;
 	struct s_command	*next;
 }	t_command;
+
+typedef struct s_trash
+{
+	t_table	*table;
+	struct s_trash	*next;
+}	t_trash;
 
 typedef struct s_fd_status
 {
