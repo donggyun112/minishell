@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/20 19:21:29 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/20 22:39:10 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -919,11 +919,11 @@ t_command	*parse(char *command_line, t_table *table)
 	if (table->syntax_error)
 		return (syntax_error__(table, &tmp1, &list, &node));
 	cmd_list = check_open_file(node, table);
+	print_cmd(node);
+	print_cmd2(cmd_list);
 	free_split(tmp1);
 	free_list(&list);
 	free_node(&node);
-	print_cmd(node);
-	print_cmd2(cmd_list);
 	return (cmd_list);
 }
 
