@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/20 19:12:12 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/20 19:21:29 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -549,6 +549,8 @@ int	env_len(char *str, t_table *table)
 
 void	*free_return_null(t_replace *d)
 {
+	if (!d)
+		return (NULL);
 	free(d->ret);
 	return (NULL);
 }
@@ -813,6 +815,8 @@ void	free_h_fd(t_heredoc_fd **h_fd)
 {
 	t_heredoc_fd	*head;
 
+	if (!*h_fd)
+		return ;
 	while (*h_fd)
 	{
 		head = (*h_fd)->next;
@@ -979,7 +983,6 @@ int	main(int ac, char *av[], char *env[])
 		free(input_command);
 	}
 	free_env(&table);
-	atexit(leaks);
 	ft_putstr_fd("\033[2D", STDOUT_FILENO);
 	ft_putstr_fd("exit\n", STDOUT_FILENO);
 	return (0);
