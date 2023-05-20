@@ -16,15 +16,9 @@ typedef struct	s_table
 {
 	char				**envp;
 	int					exit_status;
-	int					exit_flag;
 	int					syntax_error;
 	int					cmd_count;
-	struct s_tmp		*node;
-	struct s_cmd_info	**node2;
-	struct s_heredoc_fd	*node3;
-	char				**split_tmp;
 	int					fd_status;
-	struct s_table		*next;
 }	t_table;
 
 typedef struct s_cmd_info

@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/20 19:12:12 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/21 00:04:09 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -368,10 +368,12 @@ void	replace_fd(t_command *cmd_list, int infile, int outfile)
 	cmd_list->outfile = outfile;
 }
 
-void	errno_print(const char *str)
+void	errno_print(const char *str, t_table *table)
 {
 	ft_putstr_fd("minishell: ", 2);
 	perror(str);
+	table->exit_status = 1;
+	table->fd_status = -1;
 }
 
 void	close_file(t_cmd_info *node, t_fd_status *fd)
@@ -426,7 +428,7 @@ void	open_in_out_file(t_cmd_info **node, t_fd_status *fd,\
 	}
 }
 
-t_command	*check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd)
+t_command	*check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd, t_table *table)
 {
 	int 			i;
 	t_fd_status		fd;
@@ -447,7 +449,7 @@ t_command	*check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd)
 		open_in_out_file(node, &fd, i, &h_fd);
 		if (fd.status == -1)
 		{
-			errno_print(fd.error_file);
+			errno_print(fd.error_file, table);
 			fd.status = 0;
 		}
 		replace_fd(cmd_list, fd.in, fd.out);
@@ -530,12 +532,12 @@ int	env_len(char *str, t_table *table)
 	if (!str)
 		return (-1);
 	str = str + 1;
-	if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z'))
+	if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z') || str[i] == '?')
 	{
 		while (str[i] && str[i] != 32 && !(str[i] > 9 && str[i] < 13) && str[i] != '$')
 		{
 			if (!((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'a' && str[i] <= 'z')\
-			|| (str[i] >= 'A' && str[i] <= 'Z')))
+			|| (str[i] >= 'A' && str[i] <= 'Z') || str[i] == '?'))
 				return (i);
 			i++;
 		}
@@ -549,6 +551,8 @@ int	env_len(char *str, t_table *table)
 
 void	*free_return_null(t_replace *d)
 {
+	if (!d)
+		return (NULL);
 	free(d->ret);
 	return (NULL);
 }
@@ -564,8 +568,13 @@ char	*replace_val2(t_replace *d, int len)
 	return (d->tmp);
 }
 
-void	replace_val3(t_replace *d)
+void	replace_val3(t_replace *d, t_table *table)
 {
+	if (!ft_strcmp(d->tar, "?"))
+	{
+		d->tar = ft_itoa(table->exit_status);
+		return ;
+	}
 	d->tmp2 = ft_strjoin(d->tar, "=");
 	free(d->tar);
 	d->tar = getenv(d->tmp2);
@@ -620,7 +629,7 @@ char	*replace_val(t_cmd_info	*node, t_table *table)
 		d.head = ft_substr(d.base, 0, d.tmp - d.base);
 		d.tar = ft_substr(d.tmp + 1, 0, len);
 		if (len != 0)
-			replace_val3(&d);
+			replace_val3(&d, table);
 		replace_val4(&d, len);
 		i++;
 	}
@@ -642,7 +651,7 @@ void	replace_environment_variable(t_cmd_info	**node, t_table *table)
 		while (node[i])
 		{
 			tmp = replace_val(node[i], table);
-			if (tmp)
+			if (tmp && node[i]->type != quote)
 			{
 				free(node[i]->data);
 				node[i]->data = tmp;
@@ -813,6 +822,8 @@ void	free_h_fd(t_heredoc_fd **h_fd)
 {
 	t_heredoc_fd	*head;
 
+	if (!*h_fd)
+		return ;
 	while (*h_fd)
 	{
 		head = (*h_fd)->next;
@@ -828,7 +839,7 @@ t_command	*check_open_file(t_cmd_info **node, t_table *table)
 	t_command		*cmd_list;
 
 	h_fd = check_heredoc(node);
-	cmd_list = check_in_out_file(node, h_fd);
+	cmd_list = check_in_out_file(node, h_fd, table);
 	free_h_fd(&h_fd);
 	make_command(cmd_list, node);
 	return (cmd_list);
@@ -915,11 +926,13 @@ t_command	*parse(char *command_line, t_table *table)
 	if (table->syntax_error)
 		return (syntax_error__(table, &tmp1, &list, &node));
 	cmd_list = check_open_file(node, table);
+	print_cmd(node);
+	print_cmd2(cmd_list);
 	free_split(tmp1);
 	free_list(&list);
 	free_node(&node);
-	print_cmd(node);
-	print_cmd2(cmd_list);
+	if (!table->syntax_error && !table->fd_status)
+		table->exit_status = 0;
 	return (cmd_list);
 }
 
@@ -954,16 +967,21 @@ void	free_env(t_table *table)
 	free(env);
 }
 
+void	set_table(t_table *table)
+{
+	table->cmd_count = 0;
+	table->fd_status = 0;
+	table->syntax_error = 0;
+}
+
 int	main(int ac, char *av[], char *env[])
 {
 	t_table		table;
-	t_trash		*tmp;
-	t_cmd_info	**cmd;
 	t_command	*command;
 	char		*input_command;
 
-	tmp = NULL;
-	table.envp = copy_env(env);  // ---> 환경변수를 복사해둠으로써 팀원도 편하게 자원을 사용할 수 있도록 유도합니다
+	table.envp = copy_env(env);
+	table.exit_status = 0;  // ---> 환경변수를 복사해둠으로써 팀원도 편하게 자원을 사용할 수 있도록 유도합니다
 	while (ac && av)
 	{
 		input_command = readline("minishell$ "); // ---> 명령어 입력을 받도록합니다.
@@ -971,6 +989,7 @@ int	main(int ac, char *av[], char *env[])
 			break ;
 		if (*input_command != '\0' && !check_whitespace(input_command))
 		{
+			set_table(&table);
 			add_history(input_command); // 명령어를 기록하는 과정을 거칩니다 ----> history에 쌓이는 순사가 있을까요??
 			command = parse(input_command, &table);
 			//table.exit_status = execute();
@@ -979,7 +998,6 @@ int	main(int ac, char *av[], char *env[])
 		free(input_command);
 	}
 	free_env(&table);
-	atexit(leaks);
 	ft_putstr_fd("\033[2D", STDOUT_FILENO);
 	ft_putstr_fd("exit\n", STDOUT_FILENO);
 	return (0);
