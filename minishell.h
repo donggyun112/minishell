@@ -23,8 +23,8 @@ typedef struct	s_table
 	struct s_cmd_info	**node2;
 	struct s_heredoc_fd	*node3;
 	char				**split_tmp;
-	char				**split_tmp2;
 	int					fd_status;
+	struct s_table		*next;
 }	t_table;
 
 typedef struct s_cmd_info
@@ -54,6 +54,12 @@ typedef struct s_command
 	struct s_command	*next;
 }	t_command;
 
+typedef struct s_trash
+{
+	t_table	*table;
+	struct s_trash	*next;
+}	t_trash;
+
 typedef struct s_fd_status
 {
 	int		status;
@@ -61,6 +67,18 @@ typedef struct s_fd_status
 	int		out;
 	char	*error_file;
 }	t_fd_status;
+
+typedef struct s_replace
+{
+	char	*base;
+	char	*tmp;
+	char	*tmp2;
+	char	*tmp3;
+	char	*head;
+	char	*tail;
+	char	*tar;
+	char	*ret;
+}	t_replace;
 
 typedef enum s_type
 {
@@ -72,7 +90,7 @@ typedef enum s_type
 	redict_in,
 	dict_out,
 	dict_in,
-	dquoute,
+	dquote,
 	quote,
 	pipe_,
 	unexpect_token,
