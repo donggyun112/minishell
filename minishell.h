@@ -62,6 +62,18 @@ typedef struct s_fd_status
 	char	*error_file;
 }	t_fd_status;
 
+typedef struct s_replace
+{
+	char	*base;
+	char	*tmp;
+	char	*tmp2;
+	char	*tmp3;
+	char	*head;
+	char	*tail;
+	char	*tar;
+	char	*ret;
+}	t_replace;
+
 typedef enum s_type
 {
 	command = 0,

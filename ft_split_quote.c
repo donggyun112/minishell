@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/16 19:54:50 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/19 21:52:40 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ static int	is_quote(char c)
 static int	quote_len(char const *s, char *c)
 {
 	int	i;
-	int	len;
 
 	i = 0;
 	if (s[i] == '\'')
@@ -64,13 +63,35 @@ static int	quote_len(char const *s, char *c)
 	}
 }
 
+int	env_quote_len(const char *s)
+{
+	int	i;
+
+	i = 0;
+	if (s[i] == '$' && s[i + 1] == '\"')
+	{
+		i += 2;
+		while (s[i] && s[i] != '\"')
+			i++;
+		return (i + 1);
+	}
+	else
+	{
+		i += 2;
+		while (s[i] && s[i] != '\'')
+			i++;
+		return (i + 1);
+	}
+}
+
 static int	string_len__(char const *s, char *c)
 {
 	int	len;
 
 	len = 0;
-
-	if (s[len] == '\'' || s[len] == '\"')
+	if (s[len] == '$' && s[len + 1] && (s[len + 1] == '\"' || s[len + 1] == '\''))
+		len = env_quote_len(s);
+	else if (s[len] == '\'' || s[len] == '\"')
 		len = quote_len(s, c);
 	else
 	{
@@ -107,8 +128,39 @@ static char	**ft_putstring__(char const *s, char *c, char **arr)
 	return (arr);
 }
 
+const char	*check_env_quote(const char *s)
+{
+	if (*(s + 1))
+	{
+		if (*s == '$' && *(s + 1) == '\"')
+		{
+			s += 2;
+			while (*s && *s != '\"')
+				s++;
+			if (*s == '\0')
+				return (NULL);
+			return (s + 1);
+		}
+		if (*s == '$' && *(s + 1) == '\'')
+		{
+			s += 2;
+			while (*s && *s != '\'')
+				s++;
+			if (*s == '\0')
+				return (NULL);
+			return (s + 1);
+		}
+	}
+	return (NULL);
+}
+
 const char	*quote_string(const char *s, char *c, int *count)
 {
+	const char	*tmp;
+
+	tmp = check_env_quote(s);
+	if (tmp)
+		return (tmp);
 	if (*s == '\'')
 	{
 		s++;
@@ -206,5 +258,3 @@ char	**ft_split_quote(char const *s, char *c, t_table *table)
 	arr[count] = NULL;
 	return (arr);
 }
-
-// echo "-e | oyufhjhh "|>>b

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_command.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/19 17:34:39 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/20 14:49:52 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,7 +107,7 @@ t_tmp *make_cmd_list(char **tmp1, t_table *table)
 			push_tmp(&list, ft_strdup(tmp1[i]));
 			continue ;
 		}
-		tmp2 = ft_split_operator(tmp1[i], " ");
+		tmp2 = ft_split_operator(tmp1[i], "");
 		if (!tmp2 || table->syntax_error)
 			return (free_split(tmp2), free_split(&tmp1[i]));
 		j = -1;
@@ -397,7 +397,8 @@ void	close_file(t_cmd_info *node, t_fd_status *fd)
 	}
 }
 
-void	open_in_out_file(t_cmd_info **node, t_fd_status *fd, int i, t_heredoc_fd **h_fd)
+void	open_in_out_file(t_cmd_info **node, t_fd_status *fd,\
+ int i, t_heredoc_fd **h_fd)
 {
 	while (node[i])
 	{
@@ -517,7 +518,7 @@ void	make_command(t_command *cmd_list, t_cmd_info **node)
 	}
 }
 
-int	env_len(char *str)
+int	env_len(char *str, t_table *table)
 {
 	int	i;
 
@@ -525,83 +526,103 @@ int	env_len(char *str)
 	if (!str)
 		return (-1);
 	str = str + 1;
-	while (str[i] && str[i] != 32 && !(str[i] > 9 && str[i] < 13) && str[i] != '$')
-		i++;
+	if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z'))
+	{
+		while (str[i] && str[i] != 32 && !(str[i] > 9 && str[i] < 13) && str[i] != '$')
+		{
+			if (!((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'a' && str[i] <= 'z')\
+			|| (str[i] >= 'A' && str[i] <= 'Z')))
+				return (i);
+			i++;
+		}
+	}
+	else if (str[i] == 32 || (str[i] > 9 && str[i] < 13))
+		return (0);
+	else
+		table->syntax_error = 1;
 	return (i);	
 }
-
-char	*replace_val(t_cmd_info	*node)
+// $"qwe" 는 $와 ""모두 지워버리면됩니다.
+void	*free_return_null(t_replace *d)
 {
-	char	*base;
-	char	*tmp;
-	char	*tmp2;
-	char	*tmp3;
-	char	*head;
-	char	*tail;
-	char	*tar;
-	char	*ret;
-	int		len;
-	int		i;
+	free(d->ret);
+	return (NULL);
+}
 
-	base = node->data;
+char	*replace_val2(t_replace *d, int len)
+{
+	if (len == -1 && (!d->base || !*(d)->base))
+		return (d->ret);
+	d->tail = ft_strdup(d->base);
+	d->tmp = ft_strjoin(d->ret, d->tail);
+	free(d->tail);
+	free(d->ret);
+	return (d->tmp);
+}
+
+void	replace_val3(t_replace *d)
+{
+	d->tmp2 = ft_strjoin(d->tar, "=");
+	free(d->tar);
+	d->tar = getenv(d->tmp2);
+	free(d->tmp2);
+	d->tmp2 = NULL;
+	if (!d->tar)
+		d->tar = ft_strdup("");
+	else
+		d->tar = ft_strdup(d->tar);
+}
+
+void	replace_val4(t_replace *d, int len)
+{
+	d->tmp2 = ft_strjoin(d->head, d->tar);
+	free(d->head);
+	free(d->tar);
+	d->tmp3 = d->ret;
+	d->ret = ft_strjoin(d->tmp3, d->tmp2);
+	free(d->tmp2);
+	free(d->tmp3);
+	if (len == 0)
+	{
+		d->tmp2 = ft_strjoin(d->ret, "$");
+		free(d->ret);
+		d->ret = d->tmp2;
+	}
+	if (ft_strlen(d->tmp) >= len + 1)
+		d->base = d->tmp + len + 1;
+	else
+		d->base = NULL;
+}
+
+char	*replace_val(t_cmd_info	*node, t_table *table)
+{
+	t_replace	d;
+	int			len;
+	int			i;
+
+	d.base = node->data;
 	i = 0;
-	ret = ft_strdup("");
+	d.ret = ft_strdup("");
 	while (1)
 	{
-		tmp = ft_strchr(base, '$');
-		if (i == 0 && (!(tmp) || !*(tmp + 1)))
-		{
-			free(ret);
+		d.tmp = ft_strchr(d.base, '$');
+		if (i == 0 && (!(d.tmp) || !*(d.tmp + 1)))
+			return (free_return_null(&d));
+		len = env_len(d.tmp, table);
+		if (table->syntax_error)
 			return (NULL);
-		}
-		len = env_len(tmp);
-		if (!tmp)
-		{
-			if (len == -1 && (!base || !*base))
-				return (ret);
-			tail = ft_strdup(base);
-			tmp = ft_strjoin(ret, tail);
-			free(tail);
-			free(ret);
-			return (tmp);
-		}
-		head = ft_substr(base, 0, tmp - base);
-		tar = ft_substr(tmp + 1, 0, len);
+		if (!d.tmp)
+			return (replace_val2(&d, len));
+		d.head = ft_substr(d.base, 0, d.tmp - d.base);
+		d.tar = ft_substr(d.tmp + 1, 0, len);
 		if (len != 0)
-		{
-			tmp2 = ft_strjoin(tar, "=");
-			free(tar);
-			tar = getenv(tmp2);
-			free(tmp2);
-			tmp2 = NULL;
-			if (!tar)
-				tar = ft_strdup("");
-			else
-				tar = ft_strdup(tar);
-		}
-		tmp2 = ft_strjoin(head, tar);
-		free(head);
-		free(tar);
-		tmp3 = ret;
-		ret = ft_strjoin(tmp3, tmp2);
-		free(tmp2);
-		free(tmp3);
-		if (len == 0)
-		{
-			tmp2 = ft_strjoin(ret, "$");
-			free(ret);
-			ret = tmp2;
-		}
-		int z = ft_strlen(tmp);
-		if (z >= len + 1)
-			base = tmp + len + 1;
-		else
-			base = NULL;
+			replace_val3(&d);
+		replace_val4(&d, len);
 		i++;
 	}
 }
 
-void	replace_environment_variable(t_cmd_info	**node)
+void	replace_environment_variable(t_cmd_info	**node, t_table *table)
 {
 	int	i;
 	int	j;
@@ -616,7 +637,7 @@ void	replace_environment_variable(t_cmd_info	**node)
 		head = node[i];
 		while (node[i])
 		{
-			tmp = replace_val(node[i]);
+			tmp = replace_val(node[i], table);
 			if (tmp)
 			{
 				free(node[i]->data);
@@ -625,6 +646,27 @@ void	replace_environment_variable(t_cmd_info	**node)
 			node[i] = node[i]->next;
 		}
 		node[i] = head;
+		i++;
+	}
+}
+
+void	remove_env_dquote(t_cmd_info *node)
+{
+	int	i;
+	char	*tmp;
+
+	i = 0;
+	tmp = node->data;
+	if (!tmp[i])
+		return ;
+	while (tmp[i + 1])
+	{
+		if (tmp[i] == '$' && (tmp[i + 1] == '\"' || tmp[i + 1] == '\''))
+		{
+			node->data = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
+			free(tmp);
+			break ;
+		}
 		i++;
 	}
 }
@@ -650,6 +692,7 @@ void	remove_dquote(t_cmd_info **node)
 				node[i]->data = ft_substr(node[i]->data, 1, ft_strlen(node[i]->data) - 2);
 				free(tmp);
 			}
+			remove_env_dquote(node[i]);
 			node[i] = node[i]->next;
 		}
 		node[i] = head;
@@ -762,13 +805,24 @@ void	*error_clear(t_table *table)
 	return (NULL);
 }
 
+t_command	*check_open_file(t_cmd_info **node, t_table *table)
+{
+	t_heredoc_fd	*h_fd;
+	t_command		*cmd_list;
+
+	h_fd = check_heredoc(node);
+	cmd_list = check_in_out_file(node, h_fd);
+	make_command(cmd_list, node);
+	table->node3 = h_fd;
+	return (cmd_list);
+}
+
 t_command	*parse(char *command_line, t_table *table)
 {
 	char			**tmp1;
 	t_tmp			*list;
 	t_cmd_info		**node;
 	t_command		*cmd_list;
-	t_heredoc_fd	*h_fd;
 
 	tmp1 = ft_split_quote(command_line, " ", table);
 	table->split_tmp = tmp1;
@@ -783,18 +837,13 @@ t_command	*parse(char *command_line, t_table *table)
 		return (error_clear(table));
 	replace_argv_to_command(node);
 	remove_dquote(node);
-	replace_environment_variable(node);
-	h_fd = check_heredoc(node);
-	cmd_list = check_in_out_file(node, h_fd);
-	table->node3 = h_fd;
-	make_command(cmd_list, node);
+	replace_environment_variable(node, table);
+	if (table->syntax_error)
+		return (error_clear(table));
+	cmd_list = check_open_file(node, table);
 	print_cmd(node);
 	print_cmd2(cmd_list);
 	return (cmd_list);
-	// 명령어 상태를 점검합니다 --> 만일 | > >> 뒤에 unexpect인자가 들어올 경우 syntax flag를 사용하여 에러처리 후 탈출합니다
-	//check_operator(cmd, table);
-	// 쿼터체크
-	// 명령어 토근화
 }
 
 int	main(int ac, char *av[], char *env[])
@@ -804,6 +853,7 @@ int	main(int ac, char *av[], char *env[])
 	t_command	*command;
 	char		*input_command;
 
+	//atexit(leaks);
 	table.envp = copy_env(env);  // ---> 환경변수를 복사해둠으로써 팀원도 편하게 자원을 사용할 수 있도록 유도합니다
 	while (ac && av)
 	{
