@@ -9,6 +9,7 @@
 # include <fcntl.h>
 # include <errno.h>
 # include <unistd.h>
+# include <signal.h>
 # include "libft/libft.h"
 # include <stdlib.h>
 

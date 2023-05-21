@@ -6,11 +6,15 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/21 15:54:41 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/21 20:56:02 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+char	*replace_val(t_cmd_info	*node, t_table *table);
+
+// 'rl_replace_line' 함수의 선언
+void rl_replace_line(const char *text, int clear_undo);
 
 // 전역변수는 시그널을 전역변수로 두어야합니다.
 
@@ -312,7 +316,22 @@ void	print_cmd(t_cmd_info **node)
 	}
 }
 
-int	init_here_doc_data(char *limits)
+void	write_heredoc(char *line, t_table *table, int infile)
+{
+	t_cmd_info	node;
+
+	node.data = line;
+	node.data = replace_val(&node, table);
+	if (!node.data)
+		write(infile, line, ft_strlen(line));
+	else
+	{
+		write(infile, node.data, ft_strlen(node.data));
+		free(node.data);
+	}	
+}
+
+int	init_here_doc_data(char *limits, t_table *table)
 {
 	int		fd;
 	char	*line;
@@ -326,11 +345,10 @@ int	init_here_doc_data(char *limits)
 		line = readline("> ");
 		if (!line || ft_strcmp(line, limits) == 0)
 		{
-			ft_putstr_fd("\033[2D", STDOUT_FILENO);
 			free(line);
 			break ;
 		}
-		write(infile, line, ft_strlen(line));
+		write_heredoc(line, table, infile);
 		free(line);
 	}
 	close(infile);
@@ -732,7 +750,7 @@ void	push_heredoc_fd(t_heredoc_fd **h_fd, int fd)
 	}
 }
 
-t_heredoc_fd	*check_heredoc(t_cmd_info **node)
+t_heredoc_fd	*check_heredoc(t_cmd_info **node, t_table *table)
 {
 	int	i;
 	int	fd;
@@ -749,7 +767,7 @@ t_heredoc_fd	*check_heredoc(t_cmd_info **node)
 		{
 			if (node[i]->type == redict_in)
 			{
-				fd = init_here_doc_data(node[i]->data);
+				fd = init_here_doc_data(node[i]->data, table);
 				push_heredoc_fd(&h_fd, fd);
 			}
 			node[i] = node[i]->next;
@@ -838,7 +856,7 @@ t_command	*check_open_file(t_cmd_info **node, t_table *table)
 	t_heredoc_fd	*h_fd;
 	t_command		*cmd_list;
 
-	h_fd = check_heredoc(node);
+	h_fd = check_heredoc(node, table);
 	cmd_list = check_in_out_file(node, h_fd, table);
 	free_h_fd(&h_fd);
 	make_command(cmd_list, node);
@@ -974,6 +992,25 @@ void	set_table(t_table *table)
 	table->syntax_error = 0;
 }
 
+void	handler(int signal)
+{
+	if (signal == SIGINT)
+	{
+		rl_on_new_line();
+		rl_redisplay();	
+		ft_putstr_fd("  \n", STDOUT_FILENO);
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
+	}
+}
+
+void	set_signal()
+{
+	signal(SIGINT, handler);
+	signal(SIGQUIT, handler);
+}
+
 int	main(int ac, char *av[], char *env[])
 {
 	t_table		table;
@@ -982,6 +1019,7 @@ int	main(int ac, char *av[], char *env[])
 
 	table.envp = copy_env(env);
 	table.exit_status = 0;  // ---> 환경변수를 복사해둠으로써 팀원도 편하게 자원을 사용할 수 있도록 유도합니다
+	set_signal();
 	while (ac && av)
 	{
 		input_command = readline("minishell$ "); // ---> 명령어 입력을 받도록합니다.
@@ -998,7 +1036,8 @@ int	main(int ac, char *av[], char *env[])
 		free(input_command);
 	}
 	free_env(&table);
-	ft_putstr_fd("\033[2D", STDOUT_FILENO);
+	ft_putstr_fd("\033[A", STDOUT_FILENO);
+	ft_putstr_fd("\033[11C", STDOUT_FILENO);
 	ft_putstr_fd("exit\n", STDOUT_FILENO);
 	return (0);
 }
