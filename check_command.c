@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/22 02:00:47 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/22 03:18:31 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -922,7 +922,7 @@ void	*syntax_error__(t_table *table, char ***tmp, t_tmp	**list, t_cmd_info ***no
 	free_node(node);
 	return (error_clear(table));
 }
-
+#include <stdio.h>
 t_command	*parse(char *command_line, t_table *table)
 {
 	char			**tmp1;
@@ -950,7 +950,10 @@ t_command	*parse(char *command_line, t_table *table)
 	free_list(&list);
 	free_node(&node);
 	if (!table->syntax_error && !table->fd_status)
+	{
+		printf("syntax %d, fd_status %d\n", table->syntax_error, table->fd_status);
 		table->exit_status = 0;
+	}
 	return (cmd_list);
 }
 
@@ -1039,6 +1042,55 @@ void	set_signal()
 	signal(SIGQUIT, handler_quit);
 }
 
+void	ft_exit(t_command *command, t_table *table)
+{
+	unsigned char ret;
+
+	int	i;
+	int	j;
+	int	size;
+
+	i = 0;
+	if (!command || !command->cmd)
+		return ;
+	if (!ft_strcmp(command->cmd[0], "exit"))
+	{
+		size = ft_lstsize((t_list *)command);
+		if (size == 1)
+			ft_putstr_fd("eixt", 1);
+		j = 0;
+		while (command->cmd[j])
+			j++;
+		if (j == 1)
+		{
+			table->exit_status = 0;
+			exit(0);
+		}
+		while (command->cmd[1][i + 1])
+		{
+			if (!(command->cmd[1][i] == '-' && ft_isdigit(command->cmd[1][i + 1]))\
+			&& !ft_isdigit(command->cmd[1][i]))
+			{
+				printf("numeric argument required\n");
+				table->exit_status = 255;
+				exit(255);
+			}
+			i++;
+		}
+		if (j == 3)
+		{
+			printf("tomany argument\n");
+			table->exit_status = 1;
+		}
+		else if (j == 2)
+		{
+			ret = ft_atoi(command->cmd[1]);
+			table->exit_status = ret;
+			exit(ret);
+		}
+	}
+}
+
 int	main(int ac, char *av[], char *env[])
 {
 	t_table		table;
@@ -1058,6 +1110,7 @@ int	main(int ac, char *av[], char *env[])
 			set_table(&table);
 			add_history(input_command); // 명령어를 기록하는 과정을 거칩니다 ----> history에 쌓이는 순사가 있을까요??
 			command = parse(input_command, &table);
+			ft_exit(command, &table);
 			//table.exit_status = execute();
 			free_command(&command);
 		}
