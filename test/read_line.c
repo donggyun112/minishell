@@ -1,5 +1,7 @@
 # include <stdlib.h>
 # include <unistd.h>
+# include <readline/readline.h>
+# include <readline/history.h>
 # include <errno.h>
 # include <string.h>
 # include <fcntl.h>
@@ -9,11 +11,10 @@
 
 int main(void)
 {
-	char *arr[10];
+	char	*line;
 
-	arr[0] = "ls";
-	arr[1] = "\"asd\"";
-	arr[2] = "-al";
-	arr[3] = NULL;
-	execve("/bin/ls", arr, NULL);
+	while (1)
+	{
+		line = readline(">>");
+	}
 }

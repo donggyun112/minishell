@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/21 20:56:02 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/22 02:00:47 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -992,23 +992,51 @@ void	set_table(t_table *table)
 	table->syntax_error = 0;
 }
 
-void	handler(int signal)
+void	handler_int(int signal)
 {
+	pid_t	pid;
+	int		status;
+
+	pid = waitpid(-1, &status, WNOHANG);
 	if (signal == SIGINT)
 	{
-		rl_on_new_line();
-		rl_redisplay();	
-		ft_putstr_fd("  \n", STDOUT_FILENO);
-		rl_on_new_line();
-		rl_replace_line("", 0);
-		rl_redisplay();
+		if (pid == -1)
+		{
+			rl_on_new_line();
+			rl_redisplay();	
+			ft_putstr_fd("  \n", STDOUT_FILENO);
+			rl_on_new_line();
+			rl_redisplay();
+		}
+		else
+			ft_putstr_fd("\n", STDOUT_FILENO);
+	}
+	
+}
+
+void	handler_quit(int signal)
+{
+	pid_t	pid;
+	int		status;
+
+	pid = waitpid(-1, &status, WNOHANG);
+	if(signal == SIGQUIT)
+	{
+		if (pid == -1) //ok.
+		{
+			rl_on_new_line();//입력 받은 것 종료
+			rl_redisplay();// 입력받은 것 다시 출력
+			ft_putstr_fd("  \b\b", STDOUT_FILENO);
+		}
+		else
+			ft_putstr_fd("Quit: 3\n", STDOUT_FILENO);//다시출력해서 커서가 글자의 끝에 있음.
 	}
 }
 
 void	set_signal()
 {
-	signal(SIGINT, handler);
-	signal(SIGQUIT, handler);
+	signal(SIGINT, handler_int);
+	signal(SIGQUIT, handler_quit);
 }
 
 int	main(int ac, char *av[], char *env[])
