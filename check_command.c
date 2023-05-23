@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/23 12:18:02 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/23 13:22:07 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,11 +106,6 @@ t_tmp	*make_cmd_list(char **tmp1, t_table *table)
 		return (NULL);
 	while (tmp1[++i])
 	{
-		/* if (tmp1[i][0] == '\"' || tmp1[i][0] == '\'')
-		{
-			push_tmp(&list, ft_strdup(tmp1[i]));
-			continue ;
-		} */
 		tmp2 = ft_split_operator(tmp1[i], "");
 		if (!tmp2 || table->syntax_error)
 			return (free_split(tmp2), free_split(&tmp1[i]));
@@ -121,26 +116,6 @@ t_tmp	*make_cmd_list(char **tmp1, t_table *table)
 	}
 	return (list);
 }
-
-/* t_tmp *make_cmd_list(char **tmp1, t_table *table)
-{
-	t_tmp	*list;
-	char	**tmp2;
-	int		i;
-	int		j;
-
-	i = 0;
-	list = NULL;
-	while (tmp1[i])
-	{
-		if (tmp1[i] == '|')
-		tmp2 = ft_split_divid_quote(tmp1[i], "", table);
-		make_cmd_list2(tmp2, table, &list);
-		free_split(tmp2);
-		i++;
-	}
-	return (list);
-} */
 
 int	ft_strcmp(char *s1, char *s2)
 {
@@ -1127,6 +1102,19 @@ void	set_signal()
 	signal(SIGQUIT, handler_quit);
 }
 
+int	command_size(t_command *command)
+{
+	int	i;
+
+	i = 0;
+	while (command)
+	{
+		i++;
+		command = command->next;
+	}
+	return (i);
+}
+
 void	ft_exit(t_command *command, t_table *table)
 {
 	unsigned char ret;
@@ -1140,16 +1128,17 @@ void	ft_exit(t_command *command, t_table *table)
 		return ;
 	if (!ft_strcmp(command->cmd[0], "exit"))
 	{
-		size = ft_lstsize((t_list *)command);
+		size = command_size(command);
 		if (size == 1)
-			ft_putstr_fd("eixt", 1);
+			ft_putstr_fd("eixt\n", 1);
 		j = 0;
 		while (command->cmd[j])
 			j++;
 		if (j == 1)
 		{
 			table->exit_status = 0;
-			exit(0);
+			return ;
+			//exit(0);
 		}
 		while (command->cmd[1][i + 1])
 		{
@@ -1158,7 +1147,8 @@ void	ft_exit(t_command *command, t_table *table)
 			{
 				printf("numeric argument required\n");
 				table->exit_status = 255;
-				exit(255);
+				//exit(255);
+				return ;
 			}
 			i++;
 		}
@@ -1171,7 +1161,8 @@ void	ft_exit(t_command *command, t_table *table)
 		{
 			ret = ft_atoi(command->cmd[1]);
 			table->exit_status = ret;
-			exit(ret);
+			//exit(ret);
+			return ;
 		}
 	}
 }
@@ -1196,7 +1187,7 @@ int	main(int ac, char *av[], char *env[])
 			add_history(input_command); // 명령어를 기록하는 과정을 거칩니다 ----> history에 쌓이는 순사가 있을까요??
 			command = parse(input_command, &table);
 			ft_exit(command, &table);
-			//table.exit_status = execute();
+			//execute(&command, table.envp);
 			free_command(&command);
 		}
 		free(input_command);

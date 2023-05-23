@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/23 12:37:25 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/23 13:23:09 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static char	**ft_clearall(int j, char **arr)
 	return (NULL);
 }
 
-int		divid_cmd(const char *s)
+int	divid_cmd(const char *s)
 {
 	if (ft_strnstr(s, ">>", 2))
 		return (2);
