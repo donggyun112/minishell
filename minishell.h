@@ -25,6 +25,7 @@ typedef struct s_cmd_info
 {
 	char				*data;
 	int					type;
+	int					flag;
 	struct s_cmd_info	*next;
 }	t_cmd_info;
 

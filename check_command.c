@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_command.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/23 13:22:07 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/23 21:40:29 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -712,7 +712,7 @@ char	*remove_env_dquote_2(char **base)
 		if (tmp[i] == '$' && (tmp[i + 1] == '\"' || tmp[i + 1] == '\''))
 		{
 			if (i > 0 && (tmp[i - 1] == '\"' || tmp[i - 1] == '\''))
-				tmp2 = ft_strdup(")");
+				tmp2 = ft_strdup("$");
 			else
 				tmp2 = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
 			free(tmp);
@@ -999,8 +999,8 @@ t_command	*parse(char *command_line, t_table *table)
 	if (table->syntax_error)
 		return (error_clear(table));
 	replace_argv_to_command(node);
-	remove_dquote(node, table);
 	replace_environment_variable(node, table);
+	remove_dquote(node, table);
 	if (table->syntax_error)
 		return (syntax_error__(table, &tmp1, &list, &node));
 	cmd_list = check_open_file(node, table);
@@ -1137,8 +1137,9 @@ void	ft_exit(t_command *command, t_table *table)
 		if (j == 1)
 		{
 			table->exit_status = 0;
+			if (size == 1)
+				exit(0);
 			return ;
-			//exit(0);
 		}
 		while (command->cmd[1][i + 1])
 		{
@@ -1147,7 +1148,8 @@ void	ft_exit(t_command *command, t_table *table)
 			{
 				printf("numeric argument required\n");
 				table->exit_status = 255;
-				//exit(255);
+				if (size == 1)
+					exit(255);
 				return ;
 			}
 			i++;
@@ -1161,7 +1163,8 @@ void	ft_exit(t_command *command, t_table *table)
 		{
 			ret = ft_atoi(command->cmd[1]);
 			table->exit_status = ret;
-			//exit(ret);
+			if (size == 1)
+				exit(ret);
 			return ;
 		}
 	}
