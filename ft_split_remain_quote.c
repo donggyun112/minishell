@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split_remain_quote.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/23 12:15:55 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 02:46:49 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,7 +201,9 @@ const char	*wrod_count_re(const char *s, char *c)
 		if (!is_quote_re(*s))
 		{
 			s++;
-			while (*s && is_quote_re(*s))
+			while (*s && !is_quote_re(*s))
+				s++;
+			if (*s && !is_quote_re(*s))
 				s++;
 		}
 		else
