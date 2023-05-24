@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split_divid_quote.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 03:02:40 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/24 16:54:42 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 19:23:07 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ static int	string_len__(char const *s, char *c)
 	{
 		while (s[len] && is_exist__(s[len], c) && is_quote(s[len]))
 		{
-			if (s[len] == '$' && s[len + 1] && s[len + 1] == '\"' || s[len + 1] == '\'')
+			if (s[len] == '$' && s[len + 1] && (s[len + 1] == '\"' || s[len + 1] == '\''))
 				break ;
 			len++;
 		}
@@ -228,7 +228,7 @@ static int	word_count__(char const *s, char *c, t_table *table)
 				return (-1);
 			}
 			if (his != s)
-				continue;
+				continue ;
 			while (*s && is_exist__(*s, c) && is_quote(*s))
 				s++;
 		}

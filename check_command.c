@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_command.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/24 16:53:24 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 19:24:39 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -621,6 +621,22 @@ void	replace_val4(t_replace *d, int len)
 		d->base = NULL;
 }
 
+int	check_is_quote(char *tmp)
+{
+	int	i;
+
+	i = 0;
+	while (tmp[i])
+	{
+		if (tmp[i] == '\"' || tmp[i] == '\'')
+			break ;
+		i++;
+	}
+	if (tmp[i] && tmp[i] == '\'')
+		return (0);
+	return (1);
+}
+
 char	*replace_val(t_cmd_info	*node, t_table *table)
 {
 	t_replace	d;
@@ -629,6 +645,8 @@ char	*replace_val(t_cmd_info	*node, t_table *table)
 
 	d.base = node->data;
 	i = 0;
+	if (!check_is_quote(node->data))
+		return (NULL);
 	d.ret = ft_strdup("");
 	while (1)
 	{
@@ -1215,6 +1233,7 @@ int	main(int ac, char *av[], char *env[])
 		}
 		free(input_command);
 	}
+	atexit(leaks);
 	free_env(&table);
 	ft_putstr_fd("\033[A", STDOUT_FILENO);
 	ft_putstr_fd("\033[11C", STDOUT_FILENO);
