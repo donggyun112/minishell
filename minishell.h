@@ -92,6 +92,12 @@ typedef enum s_type
 	unexpect_token,
 }	t_type;
 
+typedef struct s_fd
+{
+	int	fd[2];
+	int	std_fd[2];
+}	t_fd;
+
 
 
 int	check_quote(const char *s);

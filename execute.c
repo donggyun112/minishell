@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/23 13:22:48 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 16:36:25 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,7 +151,8 @@ void	builtin_env(char **envp)
 	idx = 0;
 	while (envp[idx] != NULL)
 	{
-		ft_putendl_fd(envp[idx], STDOUT_FILENO);
+		write(STDOUT_FILENO, envp[idx], ft_strlen(envp[idx]));
+		write(STDOUT_FILENO, "\n", 1);
 		idx++;
 	}
 }
@@ -185,45 +186,52 @@ int	check_builtin(t_command *tmp)
 		|| ft_strcmp(cmd, "pwd") == 0 || ft_strcmp(cmd, "export") == 0
 		|| ft_strcmp(cmd, "unset") == 0 || ft_strcmp(cmd, "env") == 0
 		|| ft_strcmp(cmd, "exit") == 0)
-		return (0);
-	else
 		return (1);
+	else
+		return (0);
 }
 
-void	reset_fd(int fd[])
+void	reset_fd(t_fd *fds)
 {
-	dup2(STDIN_FILENO, fd[0]);
-	dup2(STDOUT_FILENO, fd[1]);
+	dup2(fds->std_fd[0], STDIN_FILENO);
+	dup2(fds->std_fd[1], STDOUT_FILENO);
 }
 
-void	exec_cmd(pid_t pid, int fd[], t_command *tmp, char **envp)
+void	exec_child(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
+{
+	if (check_builtin(tmp) == 1)
+		exit(0);
+	set_exec_path(envp, tmp->cmd);
+	execve(tmp->cmd[0], tmp->cmd, envp);
+}
+
+void	exec_parent(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
+{
+	if (tmp->infile != 0)
+		close(tmp->infile);
+	if (tmp->next != NULL && tmp->next->infile == 0)
+		tmp->next->infile = fds->fd[0];
+	close(fds->fd[1]);
+	if (check_builtin(tmp) == 1)
+	{
+		run_builtin(tmp, envp);
+		reset_fd(fds);
+	}
+}
+
+void	exec_cmd(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
 {
 	if (pid == 0)
 	{
-		dup2(tmp->infile, STDIN_FILENO);
-		if (tmp->next != NULL)
-			dup2(fd[1], STDOUT_FILENO);
-		else
-			dup2(tmp->outfile, STDOUT_FILENO);
-		close(fd[0]);
-		close(fd[1]);
-		if (check_builtin(tmp) == 0)
-			exit(0);
-		set_exec_path(envp, tmp->cmd);
-		execve(tmp->cmd[0], tmp->cmd, envp);
+		if (tmp->cmd == NULL)
+			exit (0);
+		exec_child(pid, fds, tmp, envp);
 	}
 	else
 	{
-		if (tmp->infile != 0)
-			close(tmp->infile);
-		if (tmp->next != NULL && tmp->next->infile == 0)
-			tmp->next->infile = fd[0];
-		close(fd[1]);
-		if (check_builtin(tmp) == 0)
-		{
-			run_builtin(tmp, envp);
-			reset_fd(fd);
-		}
+		if (tmp->cmd == NULL)
+			return ;
+		exec_parent(pid, fds, tmp, envp);
 	}
 }
 
@@ -232,7 +240,13 @@ void	set_pipe(pid_t pid, t_command *tmp, int fd[])
 	if (pid == 0)
 	{
 		dup2(tmp->infile, STDIN_FILENO);
-		dup2(fd[1], STDOUT_FILENO);
+		if (tmp->outfile == 1)
+			dup2(fd[1], STDOUT_FILENO);
+		else
+		{
+			dup2(tmp->outfile, STDOUT_FILENO);
+			close(fd[1]);
+		}
 		close(fd[0]);
 		// close(fd[1]);
 	}
@@ -266,8 +280,14 @@ void	set_pipe_builtin(pid_t pid, t_command *tmp, int fd[])
 {
 	if (pid > 0)
 	{
-		dup2(tmp->infile, STDIN_FILENO); //reset after run builtin!
-		dup2(fd[1], STDOUT_FILENO); //reset after run builtin!
+		dup2(tmp->infile, STDIN_FILENO);
+		if (tmp->outfile == 1)
+			dup2(fd[1], STDOUT_FILENO);
+		else
+		{
+			dup2(tmp->outfile, STDOUT_FILENO);
+			close(fd[1]);
+		}
 		close(fd[0]);
 		if (tmp->infile != 0)
 			close(tmp->infile);
@@ -276,6 +296,7 @@ void	set_pipe_builtin(pid_t pid, t_command *tmp, int fd[])
 	}
 	else
 	{
+		close(fd[0]);
 		close(fd[1]);
 	}
 }
@@ -299,42 +320,48 @@ void	set_pipe_builtin_last(pid_t pid, t_command *tmp, int fd[])
 	}
 }
 
-void	pipe_sequence(pid_t pid, t_command *tmp, int fd[])
+void	pipe_sequence(pid_t pid, t_command *tmp, t_fd *fds)
 {
-	if (tmp->next != NULL && check_builtin(tmp))
-		set_pipe(pid, tmp, fd);
-	else if (tmp->next == NULL && check_builtin(tmp))
-		set_pipe_last(pid, tmp, fd);
+	if (tmp->cmd == NULL && tmp->next == NULL)
+		set_pipe_last(pid, tmp, fds->fd);
+	else if (tmp->cmd == NULL && tmp->next != NULL)
+		set_pipe(pid, tmp, fds->fd);
 	else if (tmp->next != NULL && check_builtin(tmp) == 0)
-		set_pipe_builtin(pid, tmp, fd);
+		set_pipe(pid, tmp, fds->fd);
 	else if (tmp->next == NULL && check_builtin(tmp) == 0)
-		set_pipe_builtin_last(pid, tmp, fd);
+		set_pipe_last(pid, tmp, fds->fd);
+	else if (tmp->next != NULL && check_builtin(tmp))
+		set_pipe_builtin(pid, tmp, fds->fd);
+	else if (tmp->next == NULL && check_builtin(tmp))
+		set_pipe_builtin_last(pid, tmp, fds->fd);
 }
 
 void	execute(t_command **cmd, char **envp)
 {
 	pid_t		pid;
 	t_command	*tmp;
-	int			fd[2];
-	int			std_backup[2];
+	t_fd		fds;
 	int			status;
 
 	tmp = *cmd;
-	std_backup[0] = dup(STDIN_FILENO);
-	std_backup[0] = dup(STDIN_FILENO);
+	fds.std_fd[0] = dup(STDIN_FILENO);
+	fds.std_fd[1] = dup(STDOUT_FILENO);
 	while (tmp != NULL)
 	{
-		if (pipe(fd) < 0)
+		if (pipe(fds.fd) < 0)
 			exit_processor_error(cmd);
 		pid = fork();
 		if (pid < 0)
 			exit_processor_error(cmd);
-		pipe_sequence(pid, tmp, fd);
-		exec_cmd(pid, fd, tmp, envp);
+		pipe_sequence(pid, tmp, &fds);
+		exec_cmd(pid, &fds, tmp, envp);
 		tmp = tmp->next;
 	}
-	// dup2(0, std_backup[0]);
-	// dup2(1, std_backup[1]);
 	while (waitpid(0, &status, 0) > 0)
 		;
 }
+
+//builtin 파이프 연결 안되는거 고쳐야됨
+//builtin 구현기능 아예 새로 하는게 빠를지도?
+//builtin이 단독으로 있을때는 부모프로세스에서 실행되게 하고
+//builtin이 다른 커맨드와 같이 있을때는 자식프로세스에서 실행되게 해야 bash의 동작과 같아질 수 있다...
