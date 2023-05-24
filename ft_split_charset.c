@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/23 13:23:09 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 20:41:30 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,11 @@ int	string_len_(char const *s, char *c)
 				len++;
 			if (!s[len])
 				return (len);
+			else
+				len++;
 		}
-		len++;
+		else
+			len++;
 	}
 	return (len);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split_remain_quote.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/24 16:35:50 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 20:38:19 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,12 +89,6 @@ static int	string_len___re(char const *s, char *c)
 	int	len;
 
 	len = 0;
-	/* if (s[len] == '$' && s[len + 1] && (s[len + 1] == '\"' || s[len + 1] == '\''))
-		len = env_quote_len(s);
-	else if (s[len] == '\'' || s[len] == '\"')
-		len = quote_len(s, c);
-	else
-	{ */
 		while (s[len] && is_exist___re(s[len], c))
 		{
 			if (!is_quote_re(s[len]))

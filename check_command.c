@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/24 19:24:39 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/25 01:33:51 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -314,15 +314,22 @@ void	print_cmd(t_cmd_info **node)
 void	write_heredoc(char *line, t_table *table, int infile)
 {
 	t_cmd_info	node;
+	char		*tmp;
 
 	node.data = line;
 	node.data = replace_val(&node, table);
 	if (!node.data)
-		write(infile, line, ft_strlen(line));
+	{
+		tmp = ft_strjoin(line, "\n");
+		write(infile, tmp, ft_strlen(tmp));
+		free(tmp);
+	}
 	else
 	{
-		write(infile, node.data, ft_strlen(node.data));
+		tmp = ft_strjoin(node.data, "\n");
+		write(infile, tmp, ft_strlen(tmp));
 		free(node.data);
+		free(tmp);
 	}	
 }
 
@@ -546,7 +553,7 @@ int	env_len(char *str, t_table *table)
 	if (!str)
 		return (-1);
 	str = str + 1;
-	if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z') || str[i] == '?')
+	if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z') || str[i] == '?' || str[i] == '\"' || str[i] == '\'')
 	{
 		while (str[i] && str[i] != 32 && !(str[i] > 9 && str[i] < 13) && str[i] != '$')
 		{
@@ -586,6 +593,7 @@ void	replace_val3(t_replace *d, t_table *table)
 {
 	if (!ft_strcmp(d->tar, "?"))
 	{
+		free(d->tar);
 		d->tar = ft_itoa(table->exit_status);
 		return ;
 	}
@@ -695,25 +703,23 @@ void	replace_environment_variable(t_cmd_info	**node, t_table *table)
 	}
 }
 
-void	remove_env_dquote(t_cmd_info *node)
+char	*remove_env_dquote(char *tmp)
 {
 	int	i;
-	char	*tmp;
+	char	*ret;
 
 	i = 0;
-	tmp = node->data;
 	if (!tmp[i])
-		return ;
-	while (tmp[i + 1])
+		return (NULL);
+	if (get_cmd_type(tmp) == quote)
+		return (NULL);
+	if (tmp[i] == '$' && (tmp[i + 1] == '\"' || tmp[i + 1] == '\''))
 	{
-		if (tmp[i] == '$' && (tmp[i + 1] == '\"' || tmp[i + 1] == '\''))
-		{
-			node->data = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
-			free(tmp);
-			break ;
-		}
-		i++;
+		ret = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
+		free(tmp);
+		return (ret);
 	}
+	return (NULL);
 }
 
 int	check_dq(char *tmp)
@@ -739,9 +745,14 @@ char	*remove_env_dquote_2(char **base)
 	tmp = *base;
 	if (!tmp[i])
 		return (tmp);
+	if (get_cmd_type(tmp) == quote)
+		return (tmp);
+	tmp2 = remove_env_dquote(tmp);
+	if (tmp2)
+		return (tmp2);
 	while (tmp[i + 1])
 	{
-		if (tmp[i] == '$' && (tmp[i + 1] == '\"' || tmp[i + 1] == '\''))
+		if (tmp[i] == '$' && (tmp[i + 1] == '\"'))
 		{
 			if (i > 0 && (tmp[i - 1] == '\"' || tmp[i - 1] == '\''))
 				tmp2 = ft_strdup("$");
@@ -820,7 +831,6 @@ void	remove_dquote(t_cmd_info **node, t_table *table)
 		while (node[i])
 		{
 			remove_if(node[i], table);
-			remove_env_dquote(node[i]);
 			node[i] = node[i]->next;
 		}
 		node[i] = head;
@@ -898,6 +908,7 @@ void	check_syntax_error(t_cmd_info **node, t_table *table)
 					|| node[i]->data[j] == ';')
 					{
 						table->syntax_error = 1;
+						node[i] = head;
 						return ;
 					}
 					j++;
@@ -1020,7 +1031,14 @@ void	*syntax_error__(t_table *table, char ***tmp, t_tmp	**list, t_cmd_info ***no
 	free_node(node);
 	return (error_clear(table));
 }
-#include <stdio.h>
+
+void	set_table(t_table *table)
+{
+	table->cmd_count = 0;
+	table->fd_status = 0;
+	table->syntax_error = 0;
+}
+
 t_command	*parse(char *command_line, t_table *table)
 {
 	char			**tmp1;
@@ -1028,6 +1046,7 @@ t_command	*parse(char *command_line, t_table *table)
 	t_cmd_info		**node;
 	t_command		*cmd_list;
 
+	set_table(table);
 	tmp1 = ft_split_quote_re(command_line, " ", table);
 	if (table->syntax_error)
 		return (syntax_error_split(table, &tmp1));
@@ -1035,21 +1054,21 @@ t_command	*parse(char *command_line, t_table *table)
 	node = syntax_interpretation(list, table);
 	check_syntax_error(node, table);
 	if (table->syntax_error)
-		return (error_clear(table));
+		return (syntax_error__(table, &tmp1, &list, &node));
 	replace_argv_to_command(node);
 	replace_environment_variable(node, table);
-	remove_dquote(node, table);
 	if (table->syntax_error)
 		return (syntax_error__(table, &tmp1, &list, &node));
+	remove_dquote(node, table);
 	cmd_list = check_open_file(node, table);
-	print_cmd(node);
-	print_cmd2(cmd_list);
+	//print_cmd(node);
+	//print_cmd2(cmd_list);
 	free_split(tmp1);
 	free_list(&list);
 	free_node(&node);
 	if (!table->syntax_error && !table->fd_status)
 	{
-		printf("syntax %d, fd_status %d\n", table->syntax_error, table->fd_status);
+		//printf("syntax %d, fd_status %d\n", table->syntax_error, table->fd_status);
 		table->exit_status = 0;
 	}
 	return (cmd_list);
@@ -1086,13 +1105,6 @@ void	free_env(t_table *table)
 	free(env);
 }
 
-void	set_table(t_table *table)
-{
-	table->cmd_count = 0;
-	table->fd_status = 0;
-	table->syntax_error = 0;
-}
-
 void	handler_int(int signal)
 {
 	pid_t	pid;
@@ -1106,6 +1118,7 @@ void	handler_int(int signal)
 			rl_on_new_line();
 			rl_redisplay();	
 			ft_putstr_fd("  \n", STDOUT_FILENO);
+			rl_replace_line("", 0);
 			rl_on_new_line();
 			rl_redisplay();
 		}
@@ -1175,8 +1188,7 @@ void	ft_exit(t_command *command, t_table *table)
 		if (j == 1)
 		{
 			table->exit_status = 0;
-			if (size == 1)
-				exit(0);
+			exit(0);
 			return ;
 		}
 		while (command->cmd[1][i + 1])
@@ -1186,8 +1198,7 @@ void	ft_exit(t_command *command, t_table *table)
 			{
 				printf("numeric argument required\n");
 				table->exit_status = 255;
-				if (size == 1)
-					exit(255);
+				exit(255);
 				return ;
 			}
 			i++;
@@ -1201,9 +1212,7 @@ void	ft_exit(t_command *command, t_table *table)
 		{
 			ret = ft_atoi(command->cmd[1]);
 			table->exit_status = ret;
-			if (size == 1)
-				exit(ret);
-			return ;
+			exit(ret);
 		}
 	}
 }
@@ -1215,8 +1224,8 @@ int	main(int ac, char *av[], char *env[])
 	char		*input_command;
 
 	table.envp = copy_env(env);
-	table.exit_status = 0;  // ---> 환경변수를 복사해둠으로써 팀원도 편하게 자원을 사용할 수 있도록 유도합니다
 	set_signal();
+	table.exit_status = 0;  // ---> 환경변수를 복사해둠으로써 팀원도 편하게 자원을 사용할 수 있도록 유도합니다
 	while (ac && av)
 	{
 		input_command = readline("minishell$ "); // ---> 명령어 입력을 받도록합니다.
@@ -1224,16 +1233,14 @@ int	main(int ac, char *av[], char *env[])
 			break ;
 		if (*input_command != '\0' && !check_whitespace(input_command))
 		{
-			set_table(&table);
 			add_history(input_command); // 명령어를 기록하는 과정을 거칩니다 ----> history에 쌓이는 순사가 있을까요??
 			command = parse(input_command, &table);
 			ft_exit(command, &table);
-			//execute(&command, table.envp);
+			execute(&command, table.envp);
 			free_command(&command);
 		}
 		free(input_command);
 	}
-	atexit(leaks);
 	free_env(&table);
 	ft_putstr_fd("\033[A", STDOUT_FILENO);
 	ft_putstr_fd("\033[11C", STDOUT_FILENO);

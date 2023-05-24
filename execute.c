@@ -6,7 +6,7 @@
 /*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/24 16:36:25 by jinhyeop         ###   ########.fr       */
+/*   Updated: 2023/05/24 20:01:55 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ void	set_exec_path(char **envp, char **cmd)
 	exit_exec_error(cmd[0]);
 }
 
-void	builtin_echo(t_command *tmp)
+int	builtin_echo(t_command *tmp)
 {
 	char	**cmd;
 	int		idx;
@@ -83,13 +83,14 @@ void	builtin_echo(t_command *tmp)
 	{
 		size = ft_strlen(cmd[idx]);
 		if (write(STDOUT_FILENO, cmd[idx], size) != size)
-			return ;
+			return (1);
 		if (cmd[idx + 1] != NULL)
 			write(STDOUT_FILENO, " ", 1);
 		idx++;
 	}
 	if (opt == 0)
 		write(STDOUT_FILENO, "\n", 1);
+	return (0);
 }
 
 void	mod_envp(char *name, char *value, char **envp)
@@ -123,7 +124,7 @@ char	*find_path(char *cur, char *cmd)
 	return (NULL);
 }
 
-void	builtin_cd(t_command *tmp, char **envp)
+int	builtin_cd(t_command *tmp, char **envp)
 {
 	char	*cur;
 	char	*new_path;
@@ -135,16 +136,17 @@ void	builtin_cd(t_command *tmp, char **envp)
 	if (access(new_path, F_OK) != 0)
 	{
 		perror(tmp->cmd[1]);
-		return ;
+		return (1);
 	}
 	chdir(new_path);
 	mod_envp("OLDPWD=", cur, envp);
 	mod_envp("PWD=", new_path, envp);
 	free(cur);
 	free(new_path);
+	return (0);
 }
 
-void	builtin_env(char **envp)
+int	builtin_env(char **envp)
 {
 	int	idx;
 
@@ -155,26 +157,27 @@ void	builtin_env(char **envp)
 		write(STDOUT_FILENO, "\n", 1);
 		idx++;
 	}
+	return (0);
 }
 
-void	run_builtin(t_command *tmp, char **envp)
+int	run_builtin(t_command *tmp, char **envp)
 {
 	if (ft_strcmp(tmp->cmd[0], "echo") == 0)
-		builtin_echo(tmp);
+		return (builtin_echo(tmp));
 	else if (ft_strcmp(tmp->cmd[0], "cd") == 0)
-		builtin_cd(tmp, envp);
+		return (builtin_cd(tmp, envp));
 	// else if (ft_strcmp(tmp->cmd[0], "pwd") == 0)
-	// 	builtin_pwd();
+	// 	return (builtin_pwd());
 	// else if (ft_strcmp(tmp->cmd[0], "export") == 0)
-	// 	builtin_export();
+	// 	return (builtin_export());
 	// else if (ft_strcmp(tmp->cmd[0], "unset") == 0)
-	// 	builtin_unset();
+	// 	return (builtin_unset());
 	else if (ft_strcmp(tmp->cmd[0], "env") == 0)
-		builtin_env(envp);
+		return (builtin_env(envp));
 	// else if (ft_strcmp(tmp->cmd[0], "exit") == 0)
-	// 	builtin_exit();
+	// 	return (builtin_exit());
 	else
-		return ;
+		return (1);
 }
 
 int	check_builtin(t_command *tmp)
@@ -199,10 +202,13 @@ void	reset_fd(t_fd *fds)
 
 void	exec_child(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
 {
-	if (check_builtin(tmp) == 1)
+	if (tmp->next == NULL && tmp->num_of_cmd == 0 && check_builtin(tmp))
 		exit(0);
+	else if (check_builtin(tmp) == 1)
+		exit(run_builtin(tmp, envp));
 	set_exec_path(envp, tmp->cmd);
 	execve(tmp->cmd[0], tmp->cmd, envp);
+	exit(-1);
 }
 
 void	exec_parent(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
@@ -212,7 +218,7 @@ void	exec_parent(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
 	if (tmp->next != NULL && tmp->next->infile == 0)
 		tmp->next->infile = fds->fd[0];
 	close(fds->fd[1]);
-	if (check_builtin(tmp) == 1)
+	if (tmp->next == NULL && tmp->num_of_cmd == 0 && check_builtin(tmp))
 	{
 		run_builtin(tmp, envp);
 		reset_fd(fds);
@@ -276,30 +282,30 @@ void	set_pipe_last(pid_t pid, t_command *tmp, int fd[])
 	}
 }
 
-void	set_pipe_builtin(pid_t pid, t_command *tmp, int fd[])
-{
-	if (pid > 0)
-	{
-		dup2(tmp->infile, STDIN_FILENO);
-		if (tmp->outfile == 1)
-			dup2(fd[1], STDOUT_FILENO);
-		else
-		{
-			dup2(tmp->outfile, STDOUT_FILENO);
-			close(fd[1]);
-		}
-		close(fd[0]);
-		if (tmp->infile != 0)
-			close(tmp->infile);
-		if (tmp->next->infile == 0)
-			tmp->next->infile = fd[0];
-	}
-	else
-	{
-		close(fd[0]);
-		close(fd[1]);
-	}
-}
+// void	set_pipe_builtin(pid_t pid, t_command *tmp, int fd[])
+// {
+// 	if (pid > 0)
+// 	{
+// 		dup2(tmp->infile, STDIN_FILENO);
+// 		if (tmp->outfile == 1)
+// 			dup2(fd[1], STDOUT_FILENO);
+// 		else
+// 		{
+// 			dup2(tmp->outfile, STDOUT_FILENO);
+// 			close(fd[1]);
+// 		}
+// 		close(fd[0]);
+// 		if (tmp->infile != 0)
+// 			close(tmp->infile);
+// 		// if (tmp->next->infile == 0)
+// 		// 	tmp->next->infile = fd[0];
+// 	}
+// 	else
+// 	{
+// 		close(fd[0]);
+// 		close(fd[1]);
+// 	}
+// }
 
 void	set_pipe_builtin_last(pid_t pid, t_command *tmp, int fd[])
 {
@@ -326,15 +332,13 @@ void	pipe_sequence(pid_t pid, t_command *tmp, t_fd *fds)
 		set_pipe_last(pid, tmp, fds->fd);
 	else if (tmp->cmd == NULL && tmp->next != NULL)
 		set_pipe(pid, tmp, fds->fd);
-	else if (tmp->next != NULL && check_builtin(tmp) == 0)
+	else if (tmp->next != NULL)
 		set_pipe(pid, tmp, fds->fd);
-	else if (tmp->next == NULL && check_builtin(tmp) == 0)
-		set_pipe_last(pid, tmp, fds->fd);
-	else if (tmp->next != NULL && check_builtin(tmp))
-		set_pipe_builtin(pid, tmp, fds->fd);
-	else if (tmp->next == NULL && check_builtin(tmp))
+	else if (tmp->next == NULL && check_builtin(tmp) && tmp->num_of_cmd == 0)
 		set_pipe_builtin_last(pid, tmp, fds->fd);
-}
+	else if (tmp->next == NULL)
+		set_pipe_last(pid, tmp, fds->fd);
+}	// if cmd == NULL, check_builtin modify
 
 void	execute(t_command **cmd, char **envp)
 {
