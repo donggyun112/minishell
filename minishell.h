@@ -25,6 +25,7 @@ typedef struct s_cmd_info
 {
 	char				*data;
 	int					type;
+	int					flag;
 	struct s_cmd_info	*next;
 }	t_cmd_info;
 
@@ -44,6 +45,7 @@ typedef struct s_command
 {
 	int					infile;
 	int					outfile;
+	int					num_of_cmd;
 	char				**cmd;
 	struct s_command	*next;
 }	t_command;
@@ -92,8 +94,7 @@ typedef enum s_type
 
 
 
-char		**ft_split_quote(char const *s, char *c, t_table *table);
-static int	check_quote(const char *s);
+int	check_quote(const char *s);
 static int	word_count__(char const *s, char *c, t_table *table);
 const char	*quote_string(const char *s, char *c, int *count);
 static char	**ft_putstring__(char const *s, char *c, char **arr);
@@ -110,6 +111,20 @@ void		execute(t_command **cmd, char **envp);
 void		free_command(t_command **lst);
 int			ft_strcmp(char *s1, char *s2);
 
+static char	**ft_clearall_re(int j, char **arr);
+int	is_exist___re(char c, char *sep);
+int	is_quote_re(char c);
+static int	quote_len_re(char const *s, char *c);
+int	env_quote_len_re(const char *s);
+static int	string_len___re(char const *s, char *c);
+static char	**ft_putstring___re(char const *s, char *c, char **arr);
+const char	*check_env_quote_re(const char *s);
+const char	*quote_string_re(const char *s, char *c, int *count);
+const char	*wrod_count_re(const char *s, char *c);
+static int	word_count___re(char const *s, char *c, t_table *table);
+static int	check_quote_re(const char *s);
+char	**ft_split_divid_quote(char const *s, char *c, t_table *table);
+char	**ft_split_quote_re(char const *s, char *c, t_table *table);
 # define true 1
 # define false 0
 

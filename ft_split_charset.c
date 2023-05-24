@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/15 23:09:24 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/23 13:23:09 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static char	**ft_clearall(int j, char **arr)
 	return (NULL);
 }
 
-int		divid_cmd(const char *s)
+int	divid_cmd(const char *s)
 {
 	if (ft_strnstr(s, ">>", 2))
 		return (2);
@@ -44,7 +44,17 @@ int	string_len_(char const *s, char *c)
 	if (len)
 		return (len);
 	while (s[len] && is_exist__(s[len], c) && !divid_cmd(&s[len]))
+	{
+		if (!is_quote_re(s[len]))
+		{
+			len++;
+			while (s[len] && is_quote_re(s[len]))
+				len++;
+			if (!s[len])
+				return (len);
+		}
 		len++;
+	}
 	return (len);
 }
 
@@ -76,6 +86,26 @@ char	**ft_putstring_(char const *s, char *c, char **arr)
 	return (arr);
 }
 
+const char	*word_count_di(const char *s, char *c, int *count)
+{
+	while (*s && is_exist__(*s, c) && !divid_cmd(s))
+	{
+		if (!is_quote_re(*s))
+		{
+			s++;
+			while (*s && is_quote_re(*s))
+				s++;
+			if (!*s)
+				return (s);
+			else
+				s++;
+		}
+		else
+			s++;
+	}
+	return (s);
+}
+
 int	word_count_(char const *s, char *c)
 {
 	int	count;
@@ -96,8 +126,7 @@ int	word_count_(char const *s, char *c)
 				s++;
 				continue ;
 			}
-			while (*s && is_exist__(*s, c) && !divid_cmd(s))
-				s++;
+			s = word_count_di(s, c, &count);
 		}
 		else
 			s++;

@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/22 03:18:31 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 14:34:30 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,12 +93,12 @@ void	*free_split(char **base)
 	return (NULL);
 }
 
-t_tmp *make_cmd_list(char **tmp1, t_table *table)
+t_tmp	*make_cmd_list(char **tmp1, t_table *table)
 {
 	int			i;
 	int			j;
 	char		**tmp2;
-	t_tmp		*list;
+	t_tmp 		*list;
 
 	i = -1;
 	list = NULL;
@@ -106,11 +106,6 @@ t_tmp *make_cmd_list(char **tmp1, t_table *table)
 		return (NULL);
 	while (tmp1[++i])
 	{
-		if (tmp1[i][0] == '\"' || tmp1[i][0] == '\'')
-		{
-			push_tmp(&list, ft_strdup(tmp1[i]));
-			continue ;
-		}
 		tmp2 = ft_split_operator(tmp1[i], "");
 		if (!tmp2 || table->syntax_error)
 			return (free_split(tmp2), free_split(&tmp1[i]));
@@ -525,6 +520,7 @@ void	make_command(t_command *cmd_list, t_cmd_info **node)
 		head = node[i];
 		cmd_list->cmd = set_cmd(node[i]);
 		count = 0;
+		cmd_list->num_of_cmd = i;
 		while (node[i])
 		{
 			if (node[i]->type == command || node[i]->type  == option\
@@ -702,7 +698,77 @@ void	remove_env_dquote(t_cmd_info *node)
 	}
 }
 
-void	remove_dquote(t_cmd_info **node)
+char	*remove_env_dquote_2(char **base)
+{
+	int	i;
+	char	*tmp;
+	char	*tmp2;
+
+	i = 0;
+	tmp = *base;
+	if (!tmp[i])
+		return (tmp);
+	while (tmp[i + 1])
+	{
+		if (tmp[i] == '$' && (tmp[i + 1] == '\"' || tmp[i + 1] == '\''))
+		{
+			if (i > 0 && (tmp[i - 1] == '\"' || tmp[i - 1] == '\''))
+				tmp2 = ft_strdup("$");
+			else
+				tmp2 = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
+			free(tmp);
+			return (tmp2);
+		}
+		i++;
+	}
+	return (tmp);
+}
+
+void	link_quote(t_cmd_info **node, char **tmp)
+{
+	int	i;
+	char	*ret;
+	char	*buff;
+
+	i = 0;
+	free((*node)->data);
+	ret = ft_strdup("");
+	while (tmp[i])
+	{
+		buff = ft_strjoin(ret, tmp[i]);
+		free(ret);
+		ret = buff;
+		i++;
+	}
+	(*node)->data = ret;
+}
+
+void	*remove_if(t_cmd_info *node, t_table *table)
+{
+	char	*base;
+	char	**tmp;
+	char	*ret;
+	int		i;
+
+	base = node->data;
+	tmp = ft_split_divid_quote(base, "", table);
+	i = 0;
+	while (tmp[i])
+	{
+		tmp[i] = remove_env_dquote_2(&tmp[i]);
+		if (get_cmd_type(tmp[i]) == dquote || get_cmd_type(tmp[i]) == quote)
+		{
+			ret = ft_substr(tmp[i], 1, ft_strlen(tmp[i]) - 2);
+			free(tmp[i]);
+			tmp[i] = ret;
+		}
+		i++;
+	}
+	link_quote(&node, tmp);
+	return (free_split(tmp));
+}
+
+void	remove_dquote(t_cmd_info **node, t_table *table)
 {
 	int	i;
 	int	j;
@@ -717,12 +783,7 @@ void	remove_dquote(t_cmd_info **node)
 		head = node[i];
 		while (node[i])
 		{
-			if (node[i]->type == dquote)
-			{
-				tmp = node[i]->data;
-				node[i]->data = ft_substr(node[i]->data, 1, ft_strlen(node[i]->data) - 2);
-				free(tmp);
-			}
+			remove_if(node[i], table);
 			remove_env_dquote(node[i]);
 			node[i] = node[i]->next;
 		}
@@ -818,6 +879,7 @@ void	print_cmd2(t_command *cmd_list)
 	while (cmd_list)
 	{
 		printf("infile : %d outfile %d\n", cmd_list->infile, cmd_list->outfile);
+		printf("num_of_cmd : %d\n",cmd_list->num_of_cmd);
 		if (cmd_list->cmd != NULL)
 		{
 			for (int x = 0; cmd_list->cmd[x]; x++)
@@ -930,7 +992,7 @@ t_command	*parse(char *command_line, t_table *table)
 	t_cmd_info		**node;
 	t_command		*cmd_list;
 
-	tmp1 = ft_split_quote(command_line, " ", table);
+	tmp1 = ft_split_quote_re(command_line, " ", table);
 	if (table->syntax_error)
 		return (syntax_error_split(table, &tmp1));
 	list = make_cmd_list(tmp1, table);
@@ -939,8 +1001,8 @@ t_command	*parse(char *command_line, t_table *table)
 	if (table->syntax_error)
 		return (error_clear(table));
 	replace_argv_to_command(node);
-	remove_dquote(node);
 	replace_environment_variable(node, table);
+	remove_dquote(node, table);
 	if (table->syntax_error)
 		return (syntax_error__(table, &tmp1, &list, &node));
 	cmd_list = check_open_file(node, table);
@@ -1042,6 +1104,19 @@ void	set_signal()
 	signal(SIGQUIT, handler_quit);
 }
 
+int	command_size(t_command *command)
+{
+	int	i;
+
+	i = 0;
+	while (command)
+	{
+		i++;
+		command = command->next;
+	}
+	return (i);
+}
+
 void	ft_exit(t_command *command, t_table *table)
 {
 	unsigned char ret;
@@ -1055,16 +1130,18 @@ void	ft_exit(t_command *command, t_table *table)
 		return ;
 	if (!ft_strcmp(command->cmd[0], "exit"))
 	{
-		size = ft_lstsize((t_list *)command);
+		size = command_size(command);
 		if (size == 1)
-			ft_putstr_fd("eixt", 1);
+			ft_putstr_fd("eixt\n", 1);
 		j = 0;
 		while (command->cmd[j])
 			j++;
 		if (j == 1)
 		{
 			table->exit_status = 0;
-			exit(0);
+			if (size == 1)
+				exit(0);
+			return ;
 		}
 		while (command->cmd[1][i + 1])
 		{
@@ -1073,7 +1150,9 @@ void	ft_exit(t_command *command, t_table *table)
 			{
 				printf("numeric argument required\n");
 				table->exit_status = 255;
-				exit(255);
+				if (size == 1)
+					exit(255);
+				return ;
 			}
 			i++;
 		}
@@ -1086,7 +1165,9 @@ void	ft_exit(t_command *command, t_table *table)
 		{
 			ret = ft_atoi(command->cmd[1]);
 			table->exit_status = ret;
-			exit(ret);
+			if (size == 1)
+				exit(ret);
+			return ;
 		}
 	}
 }
@@ -1111,7 +1192,7 @@ int	main(int ac, char *av[], char *env[])
 			add_history(input_command); // 명령어를 기록하는 과정을 거칩니다 ----> history에 쌓이는 순사가 있을까요??
 			command = parse(input_command, &table);
 			ft_exit(command, &table);
-			//table.exit_status = execute();
+			//execute(&command, table.envp);
 			free_command(&command);
 		}
 		free(input_command);
