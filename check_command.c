@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/25 01:33:51 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/25 02:46:09 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -885,6 +885,37 @@ t_heredoc_fd	*check_heredoc(t_cmd_info **node, t_table *table)
 	return (h_fd);
 }
 
+int	check_quote_count(char *base)
+{
+	int	i;
+
+	i = 0;
+	while (base[i])
+	{
+		if (base[i] == '\"')
+		{
+			i++;
+			while (base[i] && base[i] != '\"')
+				i++;
+			if (!base[i])
+				return (1);
+			i++;
+		}
+		else if (base[i] == '\'')
+		{
+			i++;
+			while (base[i] && base[i] != '\'')
+				i++;
+			if (!base[i])
+				return (1);
+			i++;
+		}
+		else
+			i++;
+	}
+	return (0);
+}
+
 void	check_syntax_error(t_cmd_info **node, t_table *table)
 {
 	int			i;
@@ -899,6 +930,12 @@ void	check_syntax_error(t_cmd_info **node, t_table *table)
 		head = node[i];
 		while (node[i])
 		{
+			if (check_quote_count(node[i]->data))
+			{
+				node[i] = head;
+				table->syntax_error = 1;
+				return ;
+			}
 			if (node[i]->type != dquote && node[i]->type != quote)
 			{
 				j = 0;
