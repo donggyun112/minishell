@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/24 14:34:30 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 16:53:24 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -698,6 +698,19 @@ void	remove_env_dquote(t_cmd_info *node)
 	}
 }
 
+int	check_dq(char *tmp)
+{
+	int	i;
+
+	i = 2;
+	while (tmp[i] && tmp[i] != '\"' && tmp[i] != '\'')
+		i++;
+	if (!tmp[i])
+		return (0);
+	else
+		return (1);
+}
+
 char	*remove_env_dquote_2(char **base)
 {
 	int	i;
@@ -715,7 +728,12 @@ char	*remove_env_dquote_2(char **base)
 			if (i > 0 && (tmp[i - 1] == '\"' || tmp[i - 1] == '\''))
 				tmp2 = ft_strdup("$");
 			else
-				tmp2 = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
+			{
+				if (check_dq(&tmp[i]))
+					tmp2 = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
+				else
+					break ;
+			}
 			free(tmp);
 			return (tmp2);
 		}

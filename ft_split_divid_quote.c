@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 03:02:40 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/24 02:39:09 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 16:54:42 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,11 @@ static int	string_len__(char const *s, char *c)
 	else
 	{
 		while (s[len] && is_exist__(s[len], c) && is_quote(s[len]))
+		{
+			if (s[len] == '$' && s[len + 1] && s[len + 1] == '\"' || s[len + 1] == '\'')
+				break ;
 			len++;
+		}
 	}
 	return (len);
 }
