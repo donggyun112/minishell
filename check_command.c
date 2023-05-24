@@ -6,7 +6,7 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/24 02:47:38 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/24 14:34:30 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -520,6 +520,7 @@ void	make_command(t_command *cmd_list, t_cmd_info **node)
 		head = node[i];
 		cmd_list->cmd = set_cmd(node[i]);
 		count = 0;
+		cmd_list->num_of_cmd = i;
 		while (node[i])
 		{
 			if (node[i]->type == command || node[i]->type  == option\
@@ -878,6 +879,7 @@ void	print_cmd2(t_command *cmd_list)
 	while (cmd_list)
 	{
 		printf("infile : %d outfile %d\n", cmd_list->infile, cmd_list->outfile);
+		printf("num_of_cmd : %d\n",cmd_list->num_of_cmd);
 		if (cmd_list->cmd != NULL)
 		{
 			for (int x = 0; cmd_list->cmd[x]; x++)
