@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/25 02:46:09 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/25 02:49:41 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1273,7 +1273,7 @@ int	main(int ac, char *av[], char *env[])
 			add_history(input_command); // 명령어를 기록하는 과정을 거칩니다 ----> history에 쌓이는 순사가 있을까요??
 			command = parse(input_command, &table);
 			ft_exit(command, &table);
-			execute(&command, table.envp);
+			//execute(&command, table.envp);
 			free_command(&command);
 		}
 		free(input_command);

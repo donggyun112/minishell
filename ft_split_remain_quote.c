@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/24 20:38:19 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/25 02:51:24 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,10 +91,18 @@ static int	string_len___re(char const *s, char *c)
 	len = 0;
 		while (s[len] && is_exist___re(s[len], c))
 		{
-			if (!is_quote_re(s[len]))
+			if ((s[len]) == '\'')
 			{
 				len++;
-				while (s[len] && is_quote_re(s[len]))
+				while (s[len] && s[len] != '\'')
+					len++;
+				if (!s[len])
+					return (len);
+			}
+			else if (s[len] == '\"')
+			{
+				len++;
+				while (s[len] && s[len] != '\"')
 					len++;
 				if (!s[len])
 					return (len);
