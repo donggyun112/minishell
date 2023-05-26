@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:22:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:54:29 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:08:19 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ int	check_quote(const char *s)
 int	is_exist__(char c, char *sep)
 {
 	int	i;
-	int	flag;
 
 	i = 0;
 	while (sep[i])
@@ -61,6 +60,7 @@ int	quote_len(char const *s, char *c)
 	int	i;
 
 	i = 0;
+	(void)c;
 	if (s[i] == '\'')
 	{
 		i++;

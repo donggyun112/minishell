@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:56:37 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:19:35 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,17 +126,17 @@ int				string_len__(char const *s, char *c);
 int				env_quote_len(const char *s);
 char			**ft_putstring__(char const *s, char *c, char **arr);
 const char		*check_env_quote(const char *s);
-const char		*quote_string(const char *s, char *c, int *count);
+const char		*quote_string(const char *s);
 int				word_count__(char const *s, char *c, t_table *table);
 char			**ft_split_divid_quote(char const *s, char *c, t_table *table);
 
 // split_operator
 
+const char		*word_count_di(const char *s, char *c);
 int				string_len_(char const *s, char *c);
 int				word_count_(char const *s, char *c);
 int				divid_cmd(const char *s);
 char			**ft_putstring_(char const *s, char *c, char **arr);
-const char		*word_count_di(const char *s, char *c, int *count);
 char			**ft_split_operator(char const *s, char *c);
 
 // split_remain
@@ -144,12 +144,12 @@ char			**ft_split_operator(char const *s, char *c);
 char			**ft_clearall_re(int j, char **arr);
 int				is_exist___re(char c, char *sep);
 int				is_quote_re(char c);
-int				quote_len_re(char const *s, char *c);
+int				quote_len_re(char const *s);
 int				env_quote_len_re(const char *s);
 int				string_len___re(char const *s, char *c);
 char			**ft_putstring___re(char const *s, char *c, char **arr);
 const char		*check_env_quote_re(const char *s);
-const char		*quote_string_re(const char *s, char *c, int *count);
+const char		*quote_string_re(const char *s);
 const char		*wrod_count_re(const char *s, char *c);
 int				word_count___re(char const *s, char *c, t_table *table);
 int				check_quote_re(const char *s);
@@ -270,7 +270,7 @@ void			push_heredoc_fd(t_heredoc_fd **h_fd, int fd);
 void			push_cmd(t_cmd_info **cmd, char *data, int type);
 void			set_table(t_table *table);
 void			push_fd(t_command **cmd_list, int infile, int outfile);
-int				cmd_size(t_table *table, t_tmp *list);
+int				cmd_size(t_tmp *list);
 t_cmd_info		**set_cmd_list(t_table *table, t_tmp *list);
 
 // readline

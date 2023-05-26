@@ -6,13 +6,13 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:48:55 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:11:56 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-const char	*quote_string_re(const char *s, char *c, int *count)
+const char	*quote_string_re(const char *s)
 {
 	const char	*tmp;
 
@@ -71,7 +71,7 @@ const char	*wrod_count_re(const char *s, char *c)
 
 int	word_count___re(char const *s, char *c, t_table *table)
 {
-	int		count;
+	int			count;
 	const char	*his;
 
 	count = 0;
@@ -81,7 +81,7 @@ int	word_count___re(char const *s, char *c, t_table *table)
 		{
 			count++;
 			his = s;
-			s = quote_string_re(s, c, &count);
+			s = quote_string_re(s);
 			if (!s)
 			{
 				table->syntax_error = 1;

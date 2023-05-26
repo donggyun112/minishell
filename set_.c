@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:31:37 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:50:15 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:16:48 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,11 +83,11 @@ t_cmd_info	**set_cmd_list(t_table *table, t_tmp *list)
 	int			i;
 	t_cmd_info	**tmp;
 
-	table->cmd_count = cmd_size(table, list);
+	table->cmd_count = cmd_size(list);
 	tmp = (t_cmd_info **)malloc(sizeof(t_cmd_info *) * (table->cmd_count + 1));
 	tmp[table->cmd_count] = NULL;
 	i = -1;
 	while (++i < table->cmd_count)
-		tmp[i] = NULL;	
+		tmp[i] = NULL;
 	return (tmp);
 }

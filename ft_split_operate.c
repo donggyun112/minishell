@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:48:43 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:18:16 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ char	**ft_putstring_(char const *s, char *c, char **arr)
 	return (arr);
 }
 
-const char	*word_count_di(const char *s, char *c, int *count)
+const char	*word_count_di(const char *s, char *c)
 {
 	while (*s && is_exist__(*s, c) && !divid_cmd(s))
 	{

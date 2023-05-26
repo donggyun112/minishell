@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/26 21:41:51 by jinhyeop         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:06:31 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -440,7 +440,7 @@ void	is_dir(char *exec_path)
 	}
 }
 
-void	exec_child(pid_t pid, t_fd *fds, t_command *tmp, char ***envp)
+void	exec_child(t_command *tmp, char ***envp)
 {
 	char	*exec_path;
 
@@ -458,7 +458,7 @@ void	exec_child(pid_t pid, t_fd *fds, t_command *tmp, char ***envp)
 	exit(1);
 }
 
-void	exec_parent(pid_t pid, t_fd *fds, t_command *tmp, char ***envp)
+void	exec_parent(t_fd *fds, t_command *tmp, char ***envp)
 {
 	if (tmp->infile != 0)
 		close(tmp->infile);
@@ -478,13 +478,13 @@ void	exec_cmd(pid_t pid, t_fd *fds, t_command *tmp, char ***envp)
 	{
 		if (tmp->cmd == NULL)
 			exit (0);
-		exec_child(pid, fds, tmp, envp);
+		exec_child(tmp, envp);
 	}
 	else
 	{
 		if (tmp->cmd == NULL)
 			return ;
-		exec_parent(pid, fds, tmp, envp);
+		exec_parent(fds, tmp, envp);
 	}
 }
 

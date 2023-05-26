@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 03:02:40 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:48:17 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:07:20 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ const char	*check_env_quote(const char *s)
 	return (NULL);
 }
 
-const char	*quote_string(const char *s, char *c, int *count)
+const char	*quote_string(const char *s)
 {
 	const char	*tmp;
 
@@ -106,7 +106,7 @@ int	word_count__(char const *s, char *c, t_table *table)
 		{
 			count++;
 			his = s;
-			s = quote_string(s, c, &count);
+			s = quote_string(s);
 			if (!s)
 			{
 				table->syntax_error = 1;

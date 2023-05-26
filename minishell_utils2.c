@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:24:26 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:50:24 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:12:29 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ int	ft_strcmp(char *s1, char *s2)
 	return (0);
 }
 
-int	cmd_size(t_table *table, t_tmp *list)
+int	cmd_size(t_tmp *list)
 {
 	int	count;
 

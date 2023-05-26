@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:49:14 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 20:51:55 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:14:45 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ void	replace_val4(t_replace *d, int len)
 		free(d->ret);
 		d->ret = d->tmp2;
 	}
-	if (ft_strlen(d->tmp) >= len + 1)
+	if (ft_strlen(d->tmp) >= (size_t)(len + 1))
 		d->base = d->tmp + len + 1;
 	else
 		d->base = NULL;
@@ -95,7 +95,6 @@ void	replace_environment_variable(t_cmd_info	**node, t_table *table)
 {
 	int			i;
 	char		*tmp;
-	char		*tmp2;
 	t_cmd_info	*head;
 
 	i = 0;

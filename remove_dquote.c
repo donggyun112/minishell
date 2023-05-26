@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:53:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:15:20 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:13:16 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,8 +92,6 @@ void	remove_dquote(t_cmd_info **node, t_table *table)
 {
 	int			i;
 	int			j;
-	char		*tmp;
-	char		*tmp2;
 	t_cmd_info	*head;
 
 	i = 0;

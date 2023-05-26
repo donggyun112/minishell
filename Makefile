@@ -1,21 +1,42 @@
-NAME 	= pipex
+NAME 	= minishell
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
 # NOTE: Add files
 # ================================================
-SRC 								= pipex \
-									  get_next_line_utils \
-									  get_next_line \
-									  here_doc \
-									  pre_processing \
-									  utils \
+SRC 								= 	minishell \
+										check_inout_file  \
+										check_syntax_error \
+										execute \
+										free_func \
+										free_func2 \
+										ft_exit \
+										ft_split_divid_quote \
+										ft_split_divid_utils \
+										ft_split_divid_utils2 \
+										ft_split_operate_utils \
+										ft_split_operate \
+										ft_split_reamin_utils \
+										ft_split_remain_quote \
+										ft_split_remain_utils2 \
+										here_doc \
+										make_cmd_list \
+										make_command \
+										minishell_error_handle \
+										minishell_utils \
+										minishell_utils2 \
+										remove_dquote \
+										replace_argv_to_command \
+										replace_environment_variable \
+										set_ \
+										signal \
+										syntax_interpretation
 # ================================================
 
 SRC_CUR = $(addsuffix .c, $(SRC))
 LIBFT		= libft
 OBJ = $(SRC_CUR:.c=.o)
-HEAD 	= pipex.h
+HEAD 	= minishell.h
 
 Black	=\033[0;30m
 Red		=\033[0;31m
@@ -40,17 +61,17 @@ all : $(NAME)
 $(NAME) : $(OBJ) $(HEAD)
 	@make -C $(LIBFT)
 	@mv libft/libft.a ./
-	@$(CC) $(CFLAGS) -I $(HEAD) libft.a $(OBJ) -o $(NAME)
+	@$(CC) $(CFLAGS) -I $(HEAD) -L../readline -lreadline -lncurses -lhistory libft.a $(OBJ) -o $(NAME)
 	@printf "$(LF)"
 
 ifdef BONUS
-	@echo "$(Green)===============================================$(DEF_COLOR)"
-	@echo "$(Green)|     🎉  pipex bonus compile succsess.  🎉   |$(DEF_COLOR)"
-	@echo "$(Green)===============================================$(DEF_COLOR)"
+	@echo "$(Green)==================================================$(DEF_COLOR)"
+	@echo "$(Green)|     🎉  minishell bonus compile succsess.  🎉   |$(DEF_COLOR)"
+	@echo "$(Green)==================================================$(DEF_COLOR)"
 else
-	@echo "$(Green)===============================================$(DEF_COLOR)"
-	@echo "$(Green)|  🥳  pipex mandatory compile succsess. 🥳   |$(DEF_COLOR)"
-	@echo "$(Green)===============================================$(DEF_COLOR)"
+	@echo "$(Green)==================================================$(DEF_COLOR)"
+	@echo "$(Green)|  🥳  minishell mandatory compile succsess. 🥳   |$(DEF_COLOR)"
+	@echo "$(Green)==================================================$(DEF_COLOR)"
 endif
 
 .c.o : 

@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:33:58 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:49:23 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:10:26 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,6 @@ char	**ft_clearall_re(int j, char **arr)
 int	is_exist___re(char c, char *sep)
 {
 	int	i;
-	int	flag;
 
 	i = 0;
 	while (sep[i])
@@ -42,7 +41,7 @@ int	is_quote_re(char c)
 	return (1);
 }
 
-int	quote_len_re(char const *s, char *c)
+int	quote_len_re(char const *s)
 {
 	int	i;
 
