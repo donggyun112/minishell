@@ -54,7 +54,6 @@ CURRENT_FILE = 1
 progress_bar = printf "$(LF)$(Cyan)[$(1)/$(2)]$(DEF_COLOR) [$(Yellow)%0.1f%%$(DEF_COLOR)] $(DEF_COLOR)\b" $(shell echo "scale=1; ($(1) / $(2)) * 100" | bc); \
 		printf " [%-*s%s]" 25 "$(shell printf '%0.*s' $$(($(1) * 25 / $(2))) '=========================================================================')>" ""; \
 		printf "$(DEF_COLOR) $(Green)🔰Compiling... $(NAME) $(DEF_COLOR)" \
-		sleep 0.5
 
 all : $(NAME)
 
@@ -64,25 +63,21 @@ $(NAME) : $(OBJ) $(HEAD)
 	@$(CC) $(CFLAGS) -I $(HEAD) -L../readline -lreadline -lncurses -lhistory libft.a $(OBJ) -o $(NAME)
 	@printf "$(LF)"
 
-ifdef BONUS
 	@echo "$(Green)==================================================$(DEF_COLOR)"
-	@echo "$(Green)|     🎉  minishell bonus compile succsess.  🎉   |$(DEF_COLOR)"
-	@echo "$(Green)==================================================$(DEF_COLOR)"
-else
-	@echo "$(Green)==================================================$(DEF_COLOR)"
-	@echo "$(Green)|  🥳  minishell mandatory compile succsess. 🥳   |$(DEF_COLOR)"
-	@echo "$(Green)==================================================$(DEF_COLOR)"
-endif
+	@echo "$(Green)|        🥳  minishell compile succsess. 🥳       |$(DEF_COLOR)"
+	@echo "$(Green)|-------------------------------------------------|$(DEF_COLOR)"
+	@echo "$(Green)| $(DEF_COLOR)$(Red) This is our Minishell It's not bash $(DEF_COLOR)$(Green)           |$(DEF_COLOR)"
+	@echo "$(Green)|                                                 |$(DEF_COLOR)"
+	@echo "$(Green)===================================================$(DEF_COLOR)"
 
 .c.o : 
 	@$(CC) $(CFLAGS) -I $(HEAD) -c -o $@ $<
 	@$(call progress_bar,$(CURRENT_FILE),$(TOTAL_FILES))
 	@$(eval CURRENT_FILE=$(shell echo $$(($(CURRENT_FILE)+1))))
-	@sleep 0.1
 
 clean :
 	@rm -rf *.o all bonus libft.a
-	@printf "$(LF)🚧 $(Yellow)Cleaning...🚨 $(Purple)libft$(White) $(OBJ) \n$(DEF_COLOR) "
+	@printf "$(LF)🚧 $(Yellow)Cleaning...🚨 $(Purple)$(NAME)$(White) $(OBJ) \n$(DEF_COLOR) "
 	@make clean -C $(LIBFT)
 
 fclean : clean
