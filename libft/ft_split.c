@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/12 18:52:26 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 21:52:58 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	string_len(char const *s, char c)
 	return (len);
 }
 
-char	**ft_clearall(int j, char **arr)
+char	**ft_clearall__________(int j, char **arr)
 {
 	while (j > 0)
 		free(arr[--j]);
@@ -44,7 +44,7 @@ char	**ft_putstring(char const *s, char c, char **arr)
 			len = string_len(s, c);
 			arr[j] = (char *)malloc(len + 1);
 			if (!arr[j])
-				return (ft_clearall(j, arr));
+				return (ft_clearall__________(j, arr));
 			z = 0;
 			while (len-- > 0)
 				arr[j][z++] = *s++;

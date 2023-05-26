@@ -6,11 +6,12 @@
 /*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/24 20:01:55 by jinhyeop         ###   ########.fr       */
+/*   Updated: 2023/05/26 21:41:51 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <sys/stat.h>
 
 void	exit_processor_error(t_command **cmd)
 {
@@ -18,10 +19,49 @@ void	exit_processor_error(t_command **cmd)
 	exit (1);
 }
 
-void	exit_exec_error(char *file)
+void	exit_access_error(char *file, int err_stat)
 {
-	perror(file);
-	exit(1);
+	char	*err_str;
+
+	if (err_stat == PATH)
+	{
+		ft_putstr_fd("minishell: ", 2);
+		perror(file);
+		exit(127);
+	}
+	else
+	{
+		ft_putstr_fd("minishell: ", 2);
+		err_str = ft_strjoin(file, ": command not found");
+		ft_putendl_fd(err_str, 2);
+		exit(127);
+	}
+}
+
+char	*ft_getenv(char *name, char **envp)
+{
+	char	*rename;
+	char	*env;
+	int		idx;
+	int		j;
+
+	rename = ft_strjoin(name, "=");
+	env = NULL;
+	idx = 0;
+	j = 0;
+	while (envp[idx] != NULL)
+	{
+		if (ft_strncmp(envp[idx], rename, ft_strlen(rename)) == 0)
+		{
+			while (envp[idx][j] && envp[idx][j] != '=')
+				j++;
+			env = &envp[idx][j + 1];
+			break ;
+		}
+		idx++;
+	}
+	free(rename);
+	return (env);
 }
 
 char	*link_path(char *path, char *cmd)
@@ -35,33 +75,77 @@ char	*link_path(char *path, char *cmd)
 	return (tmp2);
 }
 
-void	set_exec_path(char **envp, char **cmd)
+void	free_strarr(char **path)
+{
+	int	idx;
+
+	idx = 0;
+	while (path[idx] != NULL)
+		free(path[idx++]);
+	free(path);
+}
+
+void	exit_no_exec_file(char *path)
+{
+	if (ft_strcmp(path, ".") == 0)
+	{
+		ft_putendl_fd("minishell: .: filename argument required", 2);
+		ft_putendl_fd(".: usage: . filename [arguments]", 2);
+		exit(1);
+	}
+	else if (ft_strcmp(path, "..") == 0)
+	{
+		ft_putendl_fd("minishell: ..: command not found", 2);
+		exit(1);
+	}
+	else if (ft_strcmp(path, "/") == 0)
+	{
+		ft_putendl_fd("minishell: /: is a directory", 2);
+		exit(1);
+	}
+	else
+	{
+		ft_putendl_fd("minishell: : command not found", 2);
+		exit(1);
+	}
+}
+
+char	*set_abs_rel_path(char *path)
+{
+	if (ft_strcmp(path, ".") == 0 || ft_strcmp(path, "..") == 0
+		|| path[0] == '\0' || ft_strcmp(path, "/") == 0)
+		exit_no_exec_file(path);
+	if (access(path, F_OK) == 0)
+		return (path);
+	exit_access_error(path, PATH);
+	return (NULL);
+}
+
+char	*set_exec_path(char ***envp_addr, char **cmd)
 {
 	char	**path;
 	char	*tmp;
+	char	**envp;
 	int		idx;
 
-	if (cmd[0][0] == '/' || (cmd[0][0] == '.' && cmd[0][1] == '/'))
-	{
-		if (access(cmd[0], X_OK) == 0)
-			return ;
-		exit_exec_error(cmd[0]);
-	}
+	envp = *envp_addr;
+	if (cmd[0][0] == '/' || cmd[0][0] == '.' || cmd[0][0] == '\0')
+		return (set_abs_rel_path(cmd[0]));
 	idx = 0;
-	path = ft_split(getenv("PATH"), ':');
-	while (path[idx] != NULL)
+	path = ft_split(ft_getenv("PATH", envp), ':');
+	while (path != NULL && path[idx] != NULL)
 	{
 		tmp = link_path(path[idx], cmd[0]);
 		if (access(tmp, X_OK) == 0)
 		{
-			free(cmd[0]);
-			cmd[0] = tmp;
-			return ;
+			free_strarr(path);
+			return (tmp);
 		}
 		free(tmp);
 		idx++;
 	}
-	exit_exec_error(cmd[0]);
+	exit_access_error(cmd[0], CMD);
+	return (NULL);
 }
 
 int	builtin_echo(t_command *tmp)
@@ -96,61 +180,92 @@ int	builtin_echo(t_command *tmp)
 void	mod_envp(char *name, char *value, char **envp)
 {
 	char	*tmp;
+	char	*rename;
 	int		idx;
 	int		flag;
 
 	idx = 0;
 	flag = 0;
+	rename = ft_strjoin(name, "=");
 	while (envp[idx] != NULL)
 	{
-		if (ft_strncmp(name, envp[idx++], (size_t)ft_strlen(name)) == 0)
+		if (ft_strncmp(rename, envp[idx], (size_t)ft_strlen(rename)) == 0)
 		{
 			flag = 1;
 			break ;
 		}
+		idx++;
 	}
 	if (flag == 1)
 	{
-		tmp = ft_strjoin(name, value);
+		tmp = ft_strjoin(rename, value);
 		free(envp[idx]);
+		envp[idx] = NULL;
 		envp[idx] = tmp;
 	}
+	free(rename);
 }
 
-char	*find_path(char *cur, char *cmd)
+char	*find_path(char *cur, char *cmd, char **envp)
 {
-	if (cmd[0] != '.' && cmd[0] != '/')
+	if (cmd == NULL)
+		return (ft_strdup(ft_getenv("HOME", envp)));
+	if (cmd[0] == '~')
+		return (ft_strjoin(ft_getenv("HOME", envp), &cmd[1]));
+	else if (cmd[0] == '/')
+		return (ft_strdup(cmd));
+	else
 		return (link_path(cur, cmd));
 	return (NULL);
 }
 
-int	builtin_cd(t_command *tmp, char **envp)
+int	print_cd_error(char *err_str, char **cur, char **pwd, char **new_path)
+{
+	ft_putstr_fd("minishell: ", 2);
+	if (err_str[0] == '~' && err_str[1] == '/')
+		perror(*new_path);
+	else
+		perror(err_str);
+	free(*cur);
+	free(*pwd);
+	free(*new_path);
+	return (1);
+}
+
+int	builtin_cd(t_command *tmp, char ***envp_addr)
 {
 	char	*cur;
+	char	*pwd;
 	char	*new_path;
+	char	**envp;
 
-	cur = (char *)malloc(1000);
-	(void)envp;
-	getcwd(cur, 1000);
-	new_path = find_path(cur, tmp->cmd[1]);
+	cur = (char *)malloc(1024);
+	printf ("%p\n", cur);
+	pwd = (char *)malloc(1024);
+	envp = *envp_addr;
+	getcwd(cur, 1024);
+	printf ("%p\n", cur);
+	new_path = find_path(cur, tmp->cmd[1], envp);
 	if (access(new_path, F_OK) != 0)
-	{
-		perror(tmp->cmd[1]);
-		return (1);
-	}
-	chdir(new_path);
-	mod_envp("OLDPWD=", cur, envp);
-	mod_envp("PWD=", new_path, envp);
+		return (print_cd_error(tmp->cmd[1], &cur, &pwd, &new_path));
+	if (chdir(new_path) != 0)
+		return (print_cd_error(tmp->cmd[1], &cur, &pwd, &new_path));
+	mod_envp("OLDPWD", cur, envp);
+	getcwd(pwd, 1024);
+	mod_envp("PWD", pwd, envp);
 	free(cur);
+	free(pwd);
 	free(new_path);
 	return (0);
 }
 
-int	builtin_env(char **envp)
+int	builtin_env(char ***envp_addr)
 {
-	int	idx;
+	int		idx;
+	char	**envp;
 
 	idx = 0;
+	envp = *envp_addr;
 	while (envp[idx] != NULL)
 	{
 		write(STDOUT_FILENO, envp[idx], ft_strlen(envp[idx]));
@@ -160,22 +275,129 @@ int	builtin_env(char **envp)
 	return (0);
 }
 
-int	run_builtin(t_command *tmp, char **envp)
+int	builtin_pwd(void)
 {
+	char	*pwd;
+
+	pwd = (char *)malloc(1024);
+	getcwd(pwd, 1024);
+	if (pwd == NULL)
+		return (1);
+	ft_putendl_fd(pwd, STDOUT_FILENO);
+	free(pwd);
+	return (0);
+}
+
+void	remove_cmd(char **cmd, char **envp)
+{
+	int		idx;
+	int		n_env;
+	char	*rename;
+
+	idx = 1;
+	while (cmd[idx] != NULL)
+	{
+		n_env = 0;
+		while (envp[n_env] != NULL)
+		{
+			rename = ft_strjoin(cmd[idx], "=");
+			if (ft_strncmp(envp[n_env], rename, ft_strlen(rename)) == 0)
+			{
+				free(rename);
+				free(envp[n_env]);
+				envp[n_env] = ft_strdup("");
+				break ;
+			}
+			free(rename);
+			n_env++;
+		}
+		idx++;
+	}
+}
+
+int	get_env_size(char **envp)
+{
+	int	idx;
+	int	size;
+
+	idx = 0;
+	size = 0;
+	while (envp[idx])
+	{
+		if (envp[idx][0] != '\0')
+			size++;
+		idx++;
+	}
+	return (size);
+}
+
+char	**reset_env(char **env_copy)
+{
+	int		size;
+	int		idx;
+	char	**new_env;
+
+	idx = 0;
+	size = get_env_size(env_copy);
+	printf("%d\n", size);
+	new_env = (char **)malloc(sizeof(char *) * (size + 1));
+	if (new_env == NULL)
+		return (NULL);
+	new_env[size] = NULL;
+	size = 0;
+	while (env_copy[idx] != NULL)
+	{
+		if (env_copy[idx][0] != '\0')
+		{
+			new_env[size] = ft_strdup(env_copy[idx]);
+			size++;
+		}
+		idx++;
+	}
+	return (new_env);
+}
+
+int	builtin_unset(char **cmd, char ***envp_addr)
+{
+	char	**env_copy;
+	char	**new_envp;
+	char	**envp;
+
+	envp = *envp_addr;
+	env_copy = copy_env(envp);
+	if (env_copy == NULL)
+		return (1);
+	remove_cmd(cmd, env_copy);
+	new_envp = reset_env(env_copy);
+	if (new_envp == NULL)
+	{
+		free_strarr(env_copy);
+		return (1);
+	}
+	free_strarr(env_copy);
+	free_strarr(envp);
+	*envp_addr = new_envp;
+	return (0);
+}
+
+int	run_builtin(t_command *tmp, char ***envp)
+{
+	if (tmp->infile < 0 || tmp->outfile < 0)
+		return (127);
 	if (ft_strcmp(tmp->cmd[0], "echo") == 0)
 		return (builtin_echo(tmp));
 	else if (ft_strcmp(tmp->cmd[0], "cd") == 0)
 		return (builtin_cd(tmp, envp));
-	// else if (ft_strcmp(tmp->cmd[0], "pwd") == 0)
-	// 	return (builtin_pwd());
+	else if (ft_strcmp(tmp->cmd[0], "pwd") == 0)
+		return (builtin_pwd());
 	// else if (ft_strcmp(tmp->cmd[0], "export") == 0)
 	// 	return (builtin_export());
-	// else if (ft_strcmp(tmp->cmd[0], "unset") == 0)
-	// 	return (builtin_unset());
+	else if (ft_strcmp(tmp->cmd[0], "unset") == 0)
+		return (builtin_unset(tmp->cmd, envp));
 	else if (ft_strcmp(tmp->cmd[0], "env") == 0)
 		return (builtin_env(envp));
 	// else if (ft_strcmp(tmp->cmd[0], "exit") == 0)
-	// 	return (builtin_exit());
+	// 	return (builtin_exit(tmp, envp));
 	else
 		return (1);
 }
@@ -184,6 +406,8 @@ int	check_builtin(t_command *tmp)
 {
 	char	*cmd;
 
+	if (tmp->cmd == NULL)
+		return (0);
 	cmd = tmp->cmd[0];
 	if (ft_strcmp(cmd, "echo") == 0 || ft_strcmp(cmd, "cd") == 0
 		|| ft_strcmp(cmd, "pwd") == 0 || ft_strcmp(cmd, "export") == 0
@@ -200,18 +424,41 @@ void	reset_fd(t_fd *fds)
 	dup2(fds->std_fd[1], STDOUT_FILENO);
 }
 
-void	exec_child(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
+void	is_dir(char *exec_path)
 {
+	struct stat	dict_stat;
+
+	if (stat(exec_path, &dict_stat) == 0)
+	{
+		if ((dict_stat.st_mode & S_IFMT) == S_IFDIR)
+		{
+			ft_putstr_fd("minishell: ", 2);
+			ft_putstr_fd(exec_path, 2);
+			ft_putendl_fd(": is a directory", 2);
+			exit(1);
+		}
+	}
+}
+
+void	exec_child(pid_t pid, t_fd *fds, t_command *tmp, char ***envp)
+{
+	char	*exec_path;
+
 	if (tmp->next == NULL && tmp->num_of_cmd == 0 && check_builtin(tmp))
 		exit(0);
 	else if (check_builtin(tmp) == 1)
 		exit(run_builtin(tmp, envp));
-	set_exec_path(envp, tmp->cmd);
-	execve(tmp->cmd[0], tmp->cmd, envp);
-	exit(-1);
+	if (tmp->infile < 0 || tmp->outfile < 0)
+		exit(127);
+	exec_path = set_exec_path(envp, tmp->cmd);
+	is_dir(exec_path);
+	execve(exec_path, tmp->cmd, *envp);
+	ft_putstr_fd("minishell: ", STDERR_FILENO);
+	perror(tmp->cmd[0]);
+	exit(1);
 }
 
-void	exec_parent(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
+void	exec_parent(pid_t pid, t_fd *fds, t_command *tmp, char ***envp)
 {
 	if (tmp->infile != 0)
 		close(tmp->infile);
@@ -225,7 +472,7 @@ void	exec_parent(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
 	}
 }
 
-void	exec_cmd(pid_t pid, t_fd *fds, t_command *tmp, char **envp)
+void	exec_cmd(pid_t pid, t_fd *fds, t_command *tmp, char ***envp)
 {
 	if (pid == 0)
 	{
@@ -254,7 +501,6 @@ void	set_pipe(pid_t pid, t_command *tmp, int fd[])
 			close(fd[1]);
 		}
 		close(fd[0]);
-		// close(fd[1]);
 	}
 	else
 	{
@@ -282,37 +528,12 @@ void	set_pipe_last(pid_t pid, t_command *tmp, int fd[])
 	}
 }
 
-// void	set_pipe_builtin(pid_t pid, t_command *tmp, int fd[])
-// {
-// 	if (pid > 0)
-// 	{
-// 		dup2(tmp->infile, STDIN_FILENO);
-// 		if (tmp->outfile == 1)
-// 			dup2(fd[1], STDOUT_FILENO);
-// 		else
-// 		{
-// 			dup2(tmp->outfile, STDOUT_FILENO);
-// 			close(fd[1]);
-// 		}
-// 		close(fd[0]);
-// 		if (tmp->infile != 0)
-// 			close(tmp->infile);
-// 		// if (tmp->next->infile == 0)
-// 		// 	tmp->next->infile = fd[0];
-// 	}
-// 	else
-// 	{
-// 		close(fd[0]);
-// 		close(fd[1]);
-// 	}
-// }
-
 void	set_pipe_builtin_last(pid_t pid, t_command *tmp, int fd[])
 {
 	if (pid > 0)
 	{
-		dup2(tmp->infile, STDIN_FILENO); //reset after run builtin!
-		dup2(tmp->outfile, STDOUT_FILENO); //reset after run builtin!
+		dup2(tmp->infile, STDIN_FILENO);
+		dup2(tmp->outfile, STDOUT_FILENO);
 		close(fd[0]);
 		close(fd[1]);
 		if (tmp->outfile != STDOUT_FILENO)
@@ -328,26 +549,24 @@ void	set_pipe_builtin_last(pid_t pid, t_command *tmp, int fd[])
 
 void	pipe_sequence(pid_t pid, t_command *tmp, t_fd *fds)
 {
-	if (tmp->cmd == NULL && tmp->next == NULL)
-		set_pipe_last(pid, tmp, fds->fd);
-	else if (tmp->cmd == NULL && tmp->next != NULL)
-		set_pipe(pid, tmp, fds->fd);
-	else if (tmp->next != NULL)
+	if (tmp->next != NULL)
 		set_pipe(pid, tmp, fds->fd);
 	else if (tmp->next == NULL && check_builtin(tmp) && tmp->num_of_cmd == 0)
 		set_pipe_builtin_last(pid, tmp, fds->fd);
 	else if (tmp->next == NULL)
 		set_pipe_last(pid, tmp, fds->fd);
-}	// if cmd == NULL, check_builtin modify
+}
 
-void	execute(t_command **cmd, char **envp)
+void	execute(t_command **cmd, t_table *table)
 {
 	pid_t		pid;
 	t_command	*tmp;
 	t_fd		fds;
 	int			status;
+	char		***envp;
 
 	tmp = *cmd;
+	envp = &(table->envp);
 	fds.std_fd[0] = dup(STDIN_FILENO);
 	fds.std_fd[1] = dup(STDOUT_FILENO);
 	while (tmp != NULL)
@@ -364,8 +583,3 @@ void	execute(t_command **cmd, char **envp)
 	while (waitpid(0, &status, 0) > 0)
 		;
 }
-
-//builtin 파이프 연결 안되는거 고쳐야됨
-//builtin 구현기능 아예 새로 하는게 빠를지도?
-//builtin이 단독으로 있을때는 부모프로세스에서 실행되게 하고
-//builtin이 다른 커맨드와 같이 있을때는 자식프로세스에서 실행되게 해야 bash의 동작과 같아질 수 있다...

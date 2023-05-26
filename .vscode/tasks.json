@@ -15,6 +15,7 @@
 				"ft_split_divid_quote.c",
 				"ft_split_remain_quote.c",
 				"ft_split_charset.c",
+				"execute.c",
 				"libft/libft.a",
                 "${file}",
                 "-o",
