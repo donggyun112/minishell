@@ -19,6 +19,7 @@ typedef struct s_table
 	int					syntax_error;
 	int					cmd_count;
 	int					fd_status;
+	int					skip_flag;
 }	t_table;
 
 typedef struct s_cmd_info

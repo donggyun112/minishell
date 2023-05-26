@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/25 02:52:01 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 15:25:54 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -388,12 +388,13 @@ void	replace_fd(t_command *cmd_list, int infile, int outfile)
 	cmd_list->outfile = outfile;
 }
 
-void	errno_print(const char *str, t_table *table)
+void	errno_print(const char *str, t_table *table, t_fd_status *fd)
 {
 	ft_putstr_fd("minishell: ", 2);
 	perror(str);
 	table->exit_status = 1;
 	table->fd_status = -1;
+	fd->status = 0;
 }
 
 void	close_file(t_cmd_info *node, t_fd_status *fd)
@@ -448,7 +449,8 @@ void	open_in_out_file(t_cmd_info **node, t_fd_status *fd,\
 	}
 }
 
-t_command	*check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd, t_table *table)
+t_command	*\
+check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd, t_table *table)
 {
 	int 			i;
 	t_fd_status		fd;
@@ -468,10 +470,7 @@ t_command	*check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd, t_table *tab
 		push_fd(&cmd_list, 0, 1);
 		open_in_out_file(node, &fd, i, &h_fd);
 		if (fd.status == -1)
-		{
-			errno_print(fd.error_file, table);
-			fd.status = 0;
-		}
+			errno_print(fd.error_file, table, &fd);
 		replace_fd(cmd_list, fd.in, fd.out);
 		node[i] = head;
 	}
@@ -479,7 +478,8 @@ t_command	*check_in_out_file(t_cmd_info **node, t_heredoc_fd *h_fd, t_table *tab
 	return (cmd_list);
 }
 
-int	count_command(t_cmd_info *node)
+int	\
+count_command(t_cmd_info *node)
 {
 	int	i;
 
@@ -495,7 +495,8 @@ int	count_command(t_cmd_info *node)
 	return (i);
 }
 
-char	**set_cmd(t_cmd_info *node)
+char	\
+**set_cmd(t_cmd_info *node)
 {
 	int		size;
 	char	**arr;
@@ -553,11 +554,14 @@ int	env_len(char *str, t_table *table)
 	if (!str)
 		return (-1);
 	str = str + 1;
-	if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z') || str[i] == '?' || str[i] == '\"' || str[i] == '\'')
+	if ((str[i] >= 'a' && str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z')\
+	|| str[i] == '?' || str[i] == '\"' || str[i] == '\'')
 	{
-		while (str[i] && str[i] != 32 && !(str[i] > 9 && str[i] < 13) && str[i] != '$')
+		while (str[i] && str[i] != 32 && !(str[i] > 9 && str[i] < 13)\
+		&& str[i] != '$')
 		{
-			if (!((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'a' && str[i] <= 'z')\
+			if (!((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'a'\
+			&& str[i] <= 'z')\
 			|| (str[i] >= 'A' && str[i] <= 'Z') || str[i] == '?'))
 				return (i);
 			i++;
@@ -567,7 +571,7 @@ int	env_len(char *str, t_table *table)
 		return (0);
 	else
 		table->syntax_error = 1;
-	return (i);	
+	return (i);
 }
 
 void	*free_return_null(t_replace *d)
@@ -597,9 +601,8 @@ void	replace_val3(t_replace *d, t_table *table)
 		d->tar = ft_itoa(table->exit_status);
 		return ;
 	}
-	d->tmp2 = ft_strjoin(d->tar, "=");
-	free(d->tar);
-	d->tar = getenv(d->tmp2);
+	d->tmp2 = d->tar;
+	d->tar = ft_getenv(d->tar, table);
 	free(d->tmp2);
 	d->tmp2 = NULL;
 	if (!d->tar)
@@ -653,8 +656,6 @@ char	*replace_val(t_cmd_info	*node, t_table *table)
 
 	d.base = node->data;
 	i = 0;
-	if (!check_is_quote(node->data))
-		return (NULL);
 	d.ret = ft_strdup("");
 	while (1)
 	{
@@ -677,20 +678,20 @@ char	*replace_val(t_cmd_info	*node, t_table *table)
 
 void	replace_environment_variable(t_cmd_info	**node, t_table *table)
 {
-	int	i;
-	int	j;
+	int			i;
 	char		*tmp;
 	char		*tmp2;
 	t_cmd_info	*head;
 
 	i = 0;
-	j = 0;
 	while (node[i])
 	{
 		head = node[i];
+		tmp = NULL;
 		while (node[i])
 		{
-			tmp = replace_val(node[i], table);
+			if (check_is_quote(node[i]->data))
+				tmp = replace_val(node[i], table);
 			if (tmp && node[i]->type != quote)
 			{
 				free(node[i]->data);
@@ -735,6 +736,25 @@ int	check_dq(char *tmp)
 		return (1);
 }
 
+char	*vaild_check(int i, char **base)
+{
+	char	*tmp;
+	char	*tmp2;
+
+	tmp = *base;
+	if (i > 0 && (tmp[i - 1] == '\"' || tmp[i - 1] == '\''))
+		tmp2 = ft_strdup("$");
+	else
+	{
+		if (check_dq(&tmp[i]))
+			tmp2 = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
+		else
+			return (NULL);
+	}
+	free(tmp);
+	return (tmp2);
+}
+
 char	*remove_env_dquote_2(char **base)
 {
 	int	i;
@@ -754,16 +774,9 @@ char	*remove_env_dquote_2(char **base)
 	{
 		if (tmp[i] == '$' && (tmp[i + 1] == '\"'))
 		{
-			if (i > 0 && (tmp[i - 1] == '\"' || tmp[i - 1] == '\''))
-				tmp2 = ft_strdup("$");
-			else
-			{
-				if (check_dq(&tmp[i]))
-					tmp2 = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
-				else
-					break ;
-			}
-			free(tmp);
+			tmp2 = vaild_check(i, &tmp);
+			if (!tmp2)
+				break ;
 			return (tmp2);
 		}
 		i++;
@@ -859,8 +872,8 @@ void	push_heredoc_fd(t_heredoc_fd **h_fd, int fd)
 
 t_heredoc_fd	*check_heredoc(t_cmd_info **node, t_table *table)
 {
-	int	i;
-	int	fd;
+	int				i;
+	int				fd;
 	t_cmd_info		*head;
 	t_heredoc_fd	*h_fd;
 
@@ -885,9 +898,19 @@ t_heredoc_fd	*check_heredoc(t_cmd_info **node, t_table *table)
 	return (h_fd);
 }
 
+int	check_quote_count2(char *base, int *i, char tar)
+{
+	while (base[*i] && base[*i] != tar)
+		*i += 1;
+	if (!base[*i])
+		return (1);
+	else
+		return (0);
+}
+
 int	check_quote_count(char *base)
 {
-	int	i;
+	int		i;
 
 	i = 0;
 	while (base[i])
@@ -895,18 +918,14 @@ int	check_quote_count(char *base)
 		if (base[i] == '\"')
 		{
 			i++;
-			while (base[i] && base[i] != '\"')
-				i++;
-			if (!base[i])
+			if (check_quote_count2(base, &i, '\"'))
 				return (1);
 			i++;
 		}
 		else if (base[i] == '\'')
 		{
 			i++;
-			while (base[i] && base[i] != '\'')
-				i++;
-			if (!base[i])
+			if (check_quote_count2(base, &i, '\''))
 				return (1);
 			i++;
 		}
@@ -916,10 +935,54 @@ int	check_quote_count(char *base)
 	return (0);
 }
 
+int	skip_quote(t_cmd_info *node, int *j)
+{
+	if (node->data[*j] == '\'')
+	{
+		*j += 1;
+		while (node->data[*j] && node->data[*j] != '\'')
+			*j += 1;
+		if (!node->data[*j])
+			return (1);
+	}
+	else if (node->data[*j] == '\"')
+	{
+		*j += 1;
+		while (node->data[*j] && node->data[*j] != '\"')
+			*j += 1;
+		if (!node->data[*j])
+			return (1);
+	}
+	return (0);
+}
+
+int	check_operator_(t_cmd_info *node, t_table *table)
+{
+	int	j;
+	t_cmd_info	*head;
+
+	j = 0;
+	head = node;
+	while (node->data[j])
+	{
+		if (node->data[j] == '\'' || node->data[j] == '\"')
+			if (skip_quote(node, &j))
+				return (0);
+		if (node->data[j] == ')' || node->data[j] == '(' \
+		|| node->data[j] == ';')
+		{
+			table->syntax_error = 1;
+			node = head;
+			return (1);
+		}
+		j++;
+	}
+	return (0);
+}
+
 void	check_syntax_error(t_cmd_info **node, t_table *table)
 {
 	int			i;
-	int			j;
 	t_cmd_info	*head;
 
 	i = 0;
@@ -937,20 +1000,8 @@ void	check_syntax_error(t_cmd_info **node, t_table *table)
 				return ;
 			}
 			if (node[i]->type != dquote && node[i]->type != quote)
-			{
-				j = 0;
-				while (node[i]->data[j])
-				{
-					if (node[i]->data[j] == ')' || node[i]->data[j] == '(' \
-					|| node[i]->data[j] == ';')
-					{
-						table->syntax_error = 1;
-						node[i] = head;
-						return ;
-					}
-					j++;
-				}
-			}
+				if (check_operator_(node[i], table))
+					return ;
 			node[i] = node[i]->next;
 		}
 		node[i] = head;
@@ -1254,6 +1305,13 @@ void	ft_exit(t_command *command, t_table *table)
 	}
 }
 
+void	end_set()
+{
+	ft_putstr_fd("\033[A", STDOUT_FILENO);
+	ft_putstr_fd("\033[11C", STDOUT_FILENO);
+	ft_putstr_fd("exit\n", STDOUT_FILENO);
+}
+
 int	main(int ac, char *av[], char *env[])
 {
 	t_table		table;
@@ -1272,16 +1330,14 @@ int	main(int ac, char *av[], char *env[])
 		{
 			add_history(input_command); // 명령어를 기록하는 과정을 거칩니다 ----> history에 쌓이는 순사가 있을까요??
 			command = parse(input_command, &table);
-			ft_exit(command, &table);
+			//ft_exit(command, &table);
 			execute(&command, table.envp);
 			free_command(&command);
 		}
 		free(input_command);
 	}
 	free_env(&table);
-	ft_putstr_fd("\033[A", STDOUT_FILENO);
-	ft_putstr_fd("\033[11C", STDOUT_FILENO);
-	ft_putstr_fd("exit\n", STDOUT_FILENO);
+	end_set();
 	return (0);
 }
 
