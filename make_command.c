@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:17:38 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:37:34 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:58:35 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	count_command(t_cmd_info *node)
 	i = 0;
 	while (node)
 	{
-		if (node->type == command || node->type  == option \
+		if (node->type == command || node->type == option \
 		|| node->type == argv || node->type == dquote \
 		|| node->type == quote)
 			i++;

@@ -6,13 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:56:28 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:35:11 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:56:35 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-
 
 void	write_heredoc(char *line, t_table *table, int infile, int type)
 {
@@ -94,4 +92,3 @@ t_heredoc_fd	*check_heredoc(t_cmd_info **node, t_table *table)
 	}
 	return (h_fd);
 }
-

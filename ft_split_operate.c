@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:18:16 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:56:06 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,8 +82,6 @@ const char	*word_count_di(const char *s, char *c)
 	}
 	return (s);
 }
-
-
 
 char	**ft_split_operator(char const *s, char *c)
 {

@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:08:05 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:23:46 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:56:54 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ int	env_len(char *str, t_table *table)
 	return (i);
 }
 
-
 int	check_quote_heredoc(char *line)
 {
 	int	i;
@@ -54,7 +53,6 @@ int	check_quote_heredoc(char *line)
 	}
 	return (0);
 }
-
 
 int	check_is_quote(char *tmp)
 {

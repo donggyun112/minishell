@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:24:26 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:12:29 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/26 22:56:59 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,6 @@ int	check_whitespace(const char *command)
 	}
 	return (1);
 }
-
 
 int	ft_strcmp(char *s1, char *s2)
 {
