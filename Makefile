@@ -30,13 +30,17 @@ SRC 								= 	minishell \
 										replace_environment_variable \
 										set_ \
 										signal \
-										syntax_interpretation
+										syntax_interpretation \
+										get_next_line \
+										get_next_line_utils \
+										set_2
 # ================================================
 
 SRC_CUR = $(addsuffix .c, $(SRC))
 LIBFT		= libft
 OBJ = $(SRC_CUR:.c=.o)
-HEAD 	= minishell.h
+HEAD 				= minishell.h
+HEAD_GET_NEXT_LINE 	= get_next_line.h
 
 Black	=\033[0;30m
 Red		=\033[0;31m
@@ -71,7 +75,7 @@ $(NAME) : $(OBJ) $(HEAD)
 	@echo "$(Green)===================================================$(DEF_COLOR)"
 
 .c.o : 
-	@$(CC) $(CFLAGS) -I $(HEAD) -c -o $@ $<
+	@$(CC) $(CFLAGS) -I $(HEAD) -I $(HEAD_GET_NEXT_LINE) -c -o $@ $<
 	@$(call progress_bar,$(CURRENT_FILE),$(TOTAL_FILES))
 	@$(eval CURRENT_FILE=$(shell echo $$(($(CURRENT_FILE)+1))))
 

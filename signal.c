@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signal.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:09:45 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/30 22:24:48 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 05:23:21 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,41 +20,28 @@ void	handler_int(int signal)
 	pid = waitpid(-1, &stat, WNOHANG);
 	if (signal == SIGINT)
 	{
-		if (pid == -1)
+		if (g_sig == 1)
 		{
-			rl_on_new_line();
-			rl_redisplay();
-			ft_putstr_fd("  \n", STDOUT_FILENO);
+			close(STDIN_FILENO);
+			g_sig = 2;
+		}
+		else if (pid == -1)
+		{
+			ft_putstr_fd("\n", STDOUT_FILENO);
 			rl_replace_line("", 0);
 			rl_on_new_line();
 			rl_redisplay();
-		}
-		else
-			ft_putstr_fd("\n", STDOUT_FILENO);
+		}	
 	}	
-}
-
-void	handler_quit(int signal)
-{
-	pid_t	pid;
-	int		status;
-
-	pid = waitpid(-1, &status, WNOHANG);
-	if (signal == SIGQUIT)
-	{
-		if (pid == -1)
-		{
-			rl_on_new_line();
-			rl_redisplay();
-			ft_putstr_fd("  \b\b", STDOUT_FILENO);
-		}
-		else
-			ft_putstr_fd("Quit: 3\n", STDOUT_FILENO);
-	}
 }
 
 void	set_signal(void)
 {
 	signal(SIGINT, handler_int);
-	signal(SIGQUIT, handler_quit);
+	signal(SIGQUIT, SIG_IGN);
+}
+
+void	get_original_signal(void)
+{
+	signal(SIGQUIT, SIG_DFL);
 }

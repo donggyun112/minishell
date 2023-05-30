@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:17:38 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:58:35 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 03:56:47 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,7 @@ t_command	*check_open_file(t_cmd_info **node, t_table *table)
 	t_heredoc_fd	*h_fd;
 	t_command		*cmd_list;
 
+	h_fd = NULL;
 	h_fd = check_heredoc(node, table);
 	cmd_list = check_in_out_file(node, h_fd, table);
 	free_h_fd(&h_fd);

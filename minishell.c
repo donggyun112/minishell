@@ -3,14 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/30 20:57:59 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 04:45:46 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include "get_next_line.h"
+
+void	end_set(void)
+{
+	ft_putstr_fd("\033[A", STDOUT_FILENO);
+	ft_putstr_fd("\033[11C", STDOUT_FILENO);
+	ft_putstr_fd("exit\n", STDOUT_FILENO);
+}
+
+
 
 t_command	*parse(char *command_line, t_table *table)
 {
@@ -40,12 +50,7 @@ t_command	*parse(char *command_line, t_table *table)
 	return (cmd_list);
 }
 
-void	end_set(void)
-{
-	ft_putstr_fd("\033[A", STDOUT_FILENO);
-	ft_putstr_fd("\033[11C", STDOUT_FILENO);
-	ft_putstr_fd("exit\n", STDOUT_FILENO);
-}
+
 
 int	main(int ac, char *av[], char *env[])
 {
@@ -53,13 +58,11 @@ int	main(int ac, char *av[], char *env[])
 	t_command	*command;
 	char		*input_command;
 
-
-	table.envp = copy_env(env);
-	
-	table.exit_status = 0;
+	init_env_and_exit_status(&table, env);
 	set_signal();
 	while (ac && av)
 	{
+		table.save_fd = dup(STDIN_FILENO);
 		input_command = readline("minishell$ ");
 		if (!input_command)
 			break ;
@@ -70,6 +73,7 @@ int	main(int ac, char *av[], char *env[])
 			execute(&command, &table);
 			free_command(&command);
 		}
+		check_sig(table.save_fd, &table);
 		free(input_command);
 	}
 	free_env(&table);

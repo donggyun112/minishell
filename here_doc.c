@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   here_doc.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:56:28 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/30 22:30:42 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 04:36:56 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include "get_next_line.h"
 
 void	write_heredoc(char *line, t_table *table, int infile, int type)
 {
@@ -43,13 +44,15 @@ int	init_here_doc_data(char *limits, t_table *table, int type)
 	char	*line;
 	int		infile;
 
+	if (g_sig == 2)
+		return (-1);
 	fd = open("/tmp/sh-thd-1641928925", \
 	O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, 0600);
 	infile = dup(fd);
 	while (1)
 	{
-		line = readline("> ");
-		if (!line || ft_strcmp(line, limits) == 0)
+		line = get_next_line(0);
+		if (!line || ft_strncmp(line, limits, ft_strlen(line) - 1) == 0)
 		{
 			free(line);
 			break ;
@@ -64,20 +67,26 @@ int	init_here_doc_data(char *limits, t_table *table, int type)
 	return (infile);
 }
 
+void	set_terminal(void)
+{
+	struct termios	term;
+
+	tcgetattr(STDIN_FILENO, &term);
+	term.c_lflag &= ~(ECHOCTL);
+	tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
 t_heredoc_fd	*check_heredoc(t_cmd_info **node, t_table *table)
 {
 	int				i;
 	int				fd;
 	t_cmd_info		*head;
 	t_heredoc_fd	*h_fd;
-	struct termios term;
-	
-	tcgetattr(STDIN_FILENO, &term);
-	term.c_lflag &= ~(ECHOCTL);
-	tcsetattr(STDIN_FILENO, TCSANOW, &term);
-	i = 0;
+
+	set_terminal();
+	i = -1;
 	h_fd = NULL;
-	while (node[i])
+	while (node[++i])
 	{
 		head = node[i];
 		fd = 0;
@@ -92,7 +101,6 @@ t_heredoc_fd	*check_heredoc(t_cmd_info **node, t_table *table)
 			node[i] = node[i]->next;
 		}
 		node[i] = head;
-		i++;
 	}
 	return (h_fd);
 }

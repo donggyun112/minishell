@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:31:37 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:16:48 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 05:03:03 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ void	set_table(t_table *table)
 	table->cmd_count = 0;
 	table->fd_status = 0;
 	table->syntax_error = 0;
+	table->builtin_exit = 0;
 }
 
 void	push_fd(t_command **cmd_list, int infile, int outfile)

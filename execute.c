@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/27 20:20:06 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 05:14:09 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,14 +27,14 @@ void	exit_access_error(char *file, int err_stat)
 	{
 		ft_putstr_fd("minishell: ", 2);
 		perror(file);
-		exit(127);
+		exit(1);
 	}
 	else
 	{
 		ft_putstr_fd("minishell: ", 2);
 		err_str = ft_strjoin(file, ": command not found");
 		ft_putendl_fd(err_str, 2);
-		exit(127);
+		exit(1);
 	}
 }
 
@@ -240,11 +240,9 @@ int	builtin_cd(t_command *tmp, char ***envp_addr)
 	char	**envp;
 
 	cur = (char *)malloc(1024);
-	printf ("%p\n", cur);
 	pwd = (char *)malloc(1024);
 	envp = *envp_addr;
 	getcwd(cur, 1024);
-	printf ("%p\n", cur);
 	new_path = find_path(cur, tmp->cmd[1], envp);
 	if (access(new_path, F_OK) != 0)
 		return (print_cd_error(tmp->cmd[1], &cur, &pwd, &new_path));
@@ -268,8 +266,11 @@ int	builtin_env(char ***envp_addr)
 	envp = *envp_addr;
 	while (envp[idx] != NULL)
 	{
-		write(STDOUT_FILENO, envp[idx], ft_strlen(envp[idx]));
-		write(STDOUT_FILENO, "\n", 1);
+		if (ft_strchr(envp[idx], 61))
+		{
+			write(STDOUT_FILENO, envp[idx], ft_strlen(envp[idx]));
+			write(STDOUT_FILENO, "\n", 1);
+		}
 		idx++;
 	}
 	return (0);
@@ -288,7 +289,7 @@ int	builtin_pwd(void)
 	return (0);
 }
 
-void	remove_cmd(char **cmd, char **envp)
+void	remove_env(char **cmd, char **envp)
 {
 	int		idx;
 	int		n_env;
@@ -339,7 +340,6 @@ char	**reset_env(char **env_copy)
 
 	idx = 0;
 	size = get_env_size(env_copy);
-	printf("%d\n", size);
 	new_env = (char **)malloc(sizeof(char *) * (size + 1));
 	if (new_env == NULL)
 		return (NULL);
@@ -367,7 +367,7 @@ int	builtin_unset(char **cmd, char ***envp_addr)
 	env_copy = copy_env(envp);
 	if (env_copy == NULL)
 		return (1);
-	remove_cmd(cmd, env_copy);
+	remove_env(cmd, env_copy);
 	new_envp = reset_env(env_copy);
 	if (new_envp == NULL)
 	{
@@ -380,27 +380,97 @@ int	builtin_unset(char **cmd, char ***envp_addr)
 	return (0);
 }
 
-int	run_builtin(t_command *tmp, char ***envp)
+void    print_sorted_ascii(char **envp)
+{
+    int idx;
+    int cursor;
+
+    idx = 0;
+    while (envp[idx] != NULL)
+    {
+        cursor = 0;
+        ft_putstr_fd("declare -x ", STDOUT_FILENO);
+        while (envp[idx][cursor] != '\0' && envp[idx][cursor] != '=')
+        {
+            write (1, &envp[idx][cursor], 1);
+            cursor++;
+        }
+        if (envp[idx][cursor] == '=')
+        {
+            write(1, "=\"", 2);
+            ft_putstr_fd(&envp[idx][cursor + 1], 1);
+            write(1, "\"", 1);
+        }
+        write (1, "\n", 1);
+        idx++;
+    }
+}
+
+int print_export(char **envp)
+{
+    int     i;
+    int     j;
+    char    *tmp;
+    char    **envp_copy;
+
+    i = 0;
+    envp_copy = copy_env(envp);
+    while (envp_copy[i])
+    {
+        j = i + 1;
+        while (envp_copy[j])
+        {
+            if (ft_strcmp(envp_copy[i], envp_copy[j]) > 0)
+            {
+                tmp = envp_copy[i];
+                envp_copy[i] = envp_copy[j];
+                envp_copy[j] = tmp;
+            }
+            j++;
+        }
+        i++;
+    }
+    print_sorted_ascii(envp_copy);
+    free_strarr(envp_copy);
+    return (0);
+}
+
+int builtin_export(t_command *tmp, char ***envp_addr)
+{
+    char    **envp;
+    char    **cmd;
+
+    envp = *envp_addr;
+    cmd = tmp->cmd;
+    if (cmd[1] == NULL)
+        return (print_export(envp));
+    else
+		return (0);
+        // return (add_env(cmd, envp_addr));
+}
+
+int	run_builtin(t_command *tmp, t_table *table)
 {
 	if (tmp->infile < 0 || tmp->outfile < 0)
 		return (127);
 	if (ft_strcmp(tmp->cmd[0], "echo") == 0)
 		return (builtin_echo(tmp));
 	else if (ft_strcmp(tmp->cmd[0], "cd") == 0)
-		return (builtin_cd(tmp, envp));
+		return (builtin_cd(tmp, &(table->envp)));
 	else if (ft_strcmp(tmp->cmd[0], "pwd") == 0)
 		return (builtin_pwd());
-	// else if (ft_strcmp(tmp->cmd[0], "export") == 0)
-	// 	return (builtin_export());
+	else if (ft_strcmp(tmp->cmd[0], "export") == 0)
+		return (builtin_export(tmp, &(table->envp)));
 	else if (ft_strcmp(tmp->cmd[0], "unset") == 0)
-		return (builtin_unset(tmp->cmd, envp));
+		return (builtin_unset(tmp->cmd, &(table->envp)));
 	else if (ft_strcmp(tmp->cmd[0], "env") == 0)
-		return (builtin_env(envp));
+		return (builtin_env(&(table->envp)));
 	else if (ft_strcmp(tmp->cmd[0], "exit") == 0)
-			ft_exit(tmp, NULL);
-	// else if (ft_strcmp(tmp->cmd[0], "exit") == 0)
-	// 	return (builtin_exit(tmp, envp));
-	//else
+	{
+		ft_exit(tmp, table);
+		return (0);
+	}
+	else
 		return (1);
 }
 
@@ -442,51 +512,67 @@ void	is_dir(char *exec_path)
 	}
 }
 
-void	exec_child(t_command *tmp, char ***envp)
+void	exec_child(t_command *tmp, t_table *table)
 {
 	char	*exec_path;
+	char	***envp;
 
+	envp = &(table->envp);
 	if (tmp->next == NULL && tmp->num_of_cmd == 0 && check_builtin(tmp))
 		exit(0);
 	else if (check_builtin(tmp) == 1)
-		exit(run_builtin(tmp, envp));
+		exit(run_builtin(tmp, table));
 	if (tmp->infile < 0 || tmp->outfile < 0)
-		exit(127);
+		exit(1);
 	exec_path = set_exec_path(envp, tmp->cmd);
 	is_dir(exec_path);
+	get_original_signal();
 	execve(exec_path, tmp->cmd, *envp);
 	ft_putstr_fd("minishell: ", STDERR_FILENO);
 	perror(tmp->cmd[0]);
 	exit(1);
 }
 
-void	exec_parent(t_fd *fds, t_command *tmp, char ***envp)
+void	exec_parent(t_fd *fds, t_command *tmp, t_table *table)
 {
-	if (tmp->infile != 0)
+	char	***envp;
+
+	envp = &(table->envp);
+	if (tmp->infile > 0)
 		close(tmp->infile);
 	if (tmp->next != NULL && tmp->next->infile == 0)
 		tmp->next->infile = fds->fd[0];
 	close(fds->fd[1]);
 	if (tmp->next == NULL && tmp->num_of_cmd == 0 && check_builtin(tmp))
 	{
-		run_builtin(tmp, envp);
+		table->builtin_exit = run_builtin(tmp, table);
 		reset_fd(fds);
 	}
 }
 
-void	exec_cmd(pid_t pid, t_fd *fds, t_command *tmp, char ***envp)
+void	exec_cmd(pid_t pid, t_fd *fds, t_command *tmp, t_table *table)
 {
 	if (pid == 0)
 	{
-		if (tmp->cmd == NULL)
+		if (tmp->infile >= 0 && tmp->outfile >= 1 && tmp->cmd == NULL)
 			exit (0);
-		exec_child(tmp, envp);
+		else if (tmp->cmd == NULL)
+			exit (1);
+		exec_child(tmp, table);
 	}
 	else
 	{
-		if (tmp->cmd == NULL)
+		if (tmp->infile >= 0 && tmp->outfile >= 1 && tmp->cmd == NULL)
+		{
+			table->exit_status = 0;
 			return ;
-		exec_parent(fds, tmp, envp);
+		}
+		else if (tmp->cmd == NULL)
+		{
+			table->exit_status = 1;
+			return ;
+		}
+		exec_parent(fds, tmp, table);
 	}
 }
 
@@ -559,16 +645,41 @@ void	pipe_sequence(pid_t pid, t_command *tmp, t_fd *fds)
 		set_pipe_last(pid, tmp, fds->fd);
 }
 
+void	set_exit_status(pid_t pid, t_table *table)
+{
+	int	exit_value;
+
+	waitpid(pid, &exit_value, 0);
+	if (exit_value == SIGINT)
+		ft_putstr_fd("\n", STDERR_FILENO);
+	else if (exit_value == SIGQUIT)
+		ft_putstr_fd("Quit: 3\n", STDERR_FILENO);
+	if (exit_value == SIGINT)
+		table->exit_status = 130;
+	else if (exit_value == SIGQUIT)
+		table->exit_status = 131;
+	else
+	{
+		if (table->builtin_exit != 0)
+		{
+			table->exit_status = table->builtin_exit;
+			table->builtin_exit = 0;
+		}
+		else
+			table->exit_status = WEXITSTATUS(exit_value);
+	}
+}
+
 void	execute(t_command **cmd, t_table *table)
 {
 	pid_t		pid;
 	t_command	*tmp;
 	t_fd		fds;
 	int			status;
-	char		***envp;
 
+	if (table->syntax_error || g_sig == 2)
+		return ;
 	tmp = *cmd;
-	envp = &(table->envp);
 	fds.std_fd[0] = dup(STDIN_FILENO);
 	fds.std_fd[1] = dup(STDOUT_FILENO);
 	while (tmp != NULL)
@@ -579,9 +690,10 @@ void	execute(t_command **cmd, t_table *table)
 		if (pid < 0)
 			exit_processor_error(cmd);
 		pipe_sequence(pid, tmp, &fds);
-		exec_cmd(pid, &fds, tmp, envp);
+		exec_cmd(pid, &fds, tmp, table);
 		tmp = tmp->next;
 	}
+	set_exit_status(pid, table);
 	while (waitpid(0, &status, 0) > 0)
 		;
 }

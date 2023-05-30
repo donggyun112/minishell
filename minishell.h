@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/29 15:07:57 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 05:03:25 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,17 @@
 # define PATH 0
 # define CMD 1
 
+int	g_sig;
+
 typedef struct s_table
 {
-	char				**envp;
-	int					exit_status;
-	int					syntax_error;
-	int					cmd_count;
-	int					fd_status;
+	char		**envp;
+	int			exit_status;
+	int			syntax_error;
+	int			cmd_count;
+	int			fd_status;
+	int			save_fd;
+	int			builtin_exit;
 }	t_table;
 
 typedef struct s_cmd_info
@@ -107,7 +111,6 @@ typedef enum s_type
 	pipe_,
 	unexpect_token,
 	special_heredoc,
-
 }	t_type;
 
 typedef struct s_fd
@@ -236,6 +239,7 @@ int				command_size(t_command *command);
 void			set_signal(void);
 void			handler_quit(int signal);
 void			handler_int(int signal);
+void			get_original_signal(void);
 
 // make_command
 
@@ -278,8 +282,12 @@ t_cmd_info		**set_cmd_list(t_table *table, t_tmp *list);
 
 void			rl_replace_line(const char *text, int clear_undo);
 
+// set2
+void			check_sig(int fd, t_table *table);
+void			init_env_and_exit_status(t_table *table, char **env);
+
 //execute
-char	*ft_getenv(char *name, char **envp);
-void	execute(t_command **cmd, t_table *table);
+char			*ft_getenv(char *name, char **envp);
+void			execute(t_command **cmd, t_table *table);
 
 #endif
