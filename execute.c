@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/31 06:25:02 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 07:12:55 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -468,18 +468,18 @@ int	print_export(char **envp)
 	return (0);
 }
 
-int builtin_export(t_command *tmp, char ***envp_addr)
+int	builtin_export(t_command *tmp, char ***envp_addr)
 {
-    char    **envp;
-    char    **cmd;
+	char	**envp;
+	char	**cmd;
 
-    envp = *envp_addr;
-    cmd = tmp->cmd;
-    if (cmd[1] == NULL)
-        return (print_export(envp));
-    else
+	envp = *envp_addr;
+	cmd = tmp->cmd;
+	if (cmd[1] == NULL)
+		return (print_export(envp));
+	else
 		return (0);
-        // return (add_env(cmd, envp_addr));
+		// return (add_env(cmd, envp_addr));
 }
 
 int	run_builtin(t_command *tmp, t_table *table)
