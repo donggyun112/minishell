@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:09:45 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 05:23:21 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 05:28:07 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	handler_int(int signal)
 			rl_replace_line("", 0);
 			rl_on_new_line();
 			rl_redisplay();
-		}	
+		}
 	}	
 }
 

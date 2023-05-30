@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/31 05:14:09 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 06:25:02 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -289,31 +289,63 @@ int	builtin_pwd(void)
 	return (0);
 }
 
-void	remove_env(char **cmd, char **envp)
+int	check_unset_valid(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (!(str[i] == '_' || ((str[i] >= 'a' && str[i] <= 'z')
+					|| (str[i] >= 'A' && str[i] <= 'Z'))))
+		{
+			ft_putstr_fd("minishell: unset: `", 2);
+			ft_putstr_fd(str, 2);
+			ft_putendl_fd("': not a valid identifier", 2);
+			return (1);
+		}
+		i++;
+	}
+	return (0);
+}
+
+int	remove_exist_env(char **envp, int n_env, int idx, char **cmd)
+{
+	if (envp[n_env][ft_strlen(cmd[idx])] == '\0'
+					|| envp[n_env][ft_strlen(cmd[idx])] == '=')
+	{
+		free(envp[n_env]);
+		envp[n_env] = ft_strdup("");
+		return (1);
+	}
+	return (0);
+}
+
+int	remove_env(char **cmd, char **envp)
 {
 	int		idx;
 	int		n_env;
-	char	*rename;
+	int		ret;
 
 	idx = 1;
+	ret = 0;
 	while (cmd[idx] != NULL)
 	{
 		n_env = 0;
+		ret = ret + check_unset_valid(cmd[idx]);
 		while (envp[n_env] != NULL)
 		{
-			rename = ft_strjoin(cmd[idx], "=");
-			if (ft_strncmp(envp[n_env], rename, ft_strlen(rename)) == 0)
-			{
-				free(rename);
-				free(envp[n_env]);
-				envp[n_env] = ft_strdup("");
-				break ;
-			}
-			free(rename);
+			if (ft_strncmp(envp[n_env], cmd[idx], ft_strlen(cmd[idx])) == 0)
+				if (remove_exist_env(envp, n_env, idx, cmd))
+					break ;
 			n_env++;
 		}
 		idx++;
 	}
+	if (ret > 0)
+		return (1);
+	else
+		return (0);
 }
 
 int	get_env_size(char **envp)
@@ -362,12 +394,13 @@ int	builtin_unset(char **cmd, char ***envp_addr)
 	char	**env_copy;
 	char	**new_envp;
 	char	**envp;
+	int		ret;
 
 	envp = *envp_addr;
 	env_copy = copy_env(envp);
 	if (env_copy == NULL)
 		return (1);
-	remove_env(cmd, env_copy);
+	ret = remove_env(cmd, env_copy);
 	new_envp = reset_env(env_copy);
 	if (new_envp == NULL)
 	{
@@ -377,62 +410,62 @@ int	builtin_unset(char **cmd, char ***envp_addr)
 	free_strarr(env_copy);
 	free_strarr(envp);
 	*envp_addr = new_envp;
+	return (ret);
+}
+
+void	print_sorted_ascii(char **envp)
+{
+	int	idx;
+	int	cursor;
+
+	idx = 0;
+	while (envp[idx] != NULL)
+	{
+		cursor = 0;
+		ft_putstr_fd("declare -x ", STDOUT_FILENO);
+		while (envp[idx][cursor] != '\0' && envp[idx][cursor] != '=')
+		{
+			write (1, &envp[idx][cursor], 1);
+			cursor++;
+		}
+		if (envp[idx][cursor] == '=')
+		{
+			write(1, "=\"", 2);
+			ft_putstr_fd(&envp[idx][cursor + 1], 1);
+			write(1, "\"", 1);
+		}
+		write (1, "\n", 1);
+		idx++;
+	}
+}
+
+int	print_export(char **envp)
+{
+	int		i;
+	int		j;
+	char	*tmp;
+	char	**envp_copy;
+
+	i = 0;
+	envp_copy = copy_env(envp);
+	while (envp_copy[i])
+	{
+		j = i + 1;
+		while (envp_copy[j])
+		{
+			if (ft_strcmp(envp_copy[i], envp_copy[j]) > 0)
+			{
+				tmp = envp_copy[i];
+				envp_copy[i] = envp_copy[j];
+				envp_copy[j] = tmp;
+			}
+			j++;
+		}
+		i++;
+	}
+	print_sorted_ascii(envp_copy);
+	free_strarr(envp_copy);
 	return (0);
-}
-
-void    print_sorted_ascii(char **envp)
-{
-    int idx;
-    int cursor;
-
-    idx = 0;
-    while (envp[idx] != NULL)
-    {
-        cursor = 0;
-        ft_putstr_fd("declare -x ", STDOUT_FILENO);
-        while (envp[idx][cursor] != '\0' && envp[idx][cursor] != '=')
-        {
-            write (1, &envp[idx][cursor], 1);
-            cursor++;
-        }
-        if (envp[idx][cursor] == '=')
-        {
-            write(1, "=\"", 2);
-            ft_putstr_fd(&envp[idx][cursor + 1], 1);
-            write(1, "\"", 1);
-        }
-        write (1, "\n", 1);
-        idx++;
-    }
-}
-
-int print_export(char **envp)
-{
-    int     i;
-    int     j;
-    char    *tmp;
-    char    **envp_copy;
-
-    i = 0;
-    envp_copy = copy_env(envp);
-    while (envp_copy[i])
-    {
-        j = i + 1;
-        while (envp_copy[j])
-        {
-            if (ft_strcmp(envp_copy[i], envp_copy[j]) > 0)
-            {
-                tmp = envp_copy[i];
-                envp_copy[i] = envp_copy[j];
-                envp_copy[j] = tmp;
-            }
-            j++;
-        }
-        i++;
-    }
-    print_sorted_ascii(envp_copy);
-    free_strarr(envp_copy);
-    return (0);
 }
 
 int builtin_export(t_command *tmp, char ***envp_addr)
