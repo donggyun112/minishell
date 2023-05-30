@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:52:58 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/30 23:39:11 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,8 @@ char	**ft_split(char const *s, char c)
 	char	**arr;
 	int		count;
 
+	if (!s)
+		return (NULL);
 	count = word_count(s, c);
 	arr = (char **)malloc(sizeof(char *) * (count + 1));
 	if (!arr)
