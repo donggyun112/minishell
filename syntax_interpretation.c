@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   syntax_interpretation.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:41:10 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 20:44:09 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/27 20:07:52 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ int	get_cmd_type(char *cmd)
 		return (unexpect_token);
 	return (argv);
 }
-
+#include <stdio.h>
 char	*remove_env_dquote(char *tmp)
 {
 	int		i;

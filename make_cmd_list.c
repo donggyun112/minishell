@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   make_cmd_list.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:38:47 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 20:39:37 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/27 19:55:49 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ void	push_tmp(t_tmp **list, char *data)
 	}
 }
 
-t_tmp	*make_cmd_list(char **tmp1, t_table *table)
+t_tmp	*split_divid_operator(char **tmp1, t_table *table)
 {
 	int			i;
 	int			j;

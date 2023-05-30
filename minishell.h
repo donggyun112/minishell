@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:19:35 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/29 15:07:57 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <unistd.h>
 # include "libft/libft.h"
 # include <stdlib.h>
+# include <termios.h>
 
 # define PATH 0
 # define CMD 1
@@ -157,7 +158,7 @@ char			**ft_split_quote_re(char const *s, char *c, t_table *table);
 
 // make cmd list
 
-t_tmp			*make_cmd_list(char **tmp1, t_table *table);
+t_tmp			*split_divid_operator(char **tmp1, t_table *table);
 void			push_tmp(t_tmp **list, char *data);
 
 // syntax_interpretation

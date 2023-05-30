@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:57:09 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/30 20:57:59 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ t_command	*parse(char *command_line, t_table *table)
 	tmp1 = ft_split_quote_re(command_line, " ", table);
 	if (table->syntax_error)
 		return (syntax_error_split(table, &tmp1));
-	list = make_cmd_list(tmp1, table);
+	list = split_divid_operator(tmp1, table);
 	node = syntax_interpretation(list, table);
 	check_syntax_error(node, table);
 	if (table->syntax_error)
@@ -53,9 +53,11 @@ int	main(int ac, char *av[], char *env[])
 	t_command	*command;
 	char		*input_command;
 
+
 	table.envp = copy_env(env);
-	set_signal();
+	
 	table.exit_status = 0;
+	set_signal();
 	while (ac && av)
 	{
 		input_command = readline("minishell$ ");

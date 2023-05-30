@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:08:05 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:56:54 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/27 19:59:05 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,8 @@ int	check_is_quote(char *tmp)
 		i++;
 	}
 	if (tmp[i] && tmp[i] == '\'')
-		return (0);
-	return (1);
+		return (1);
+	return (0);
 }
 
 int	check_dq(char *tmp)

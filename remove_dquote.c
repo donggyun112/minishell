@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   remove_dquote.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:53:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:13:16 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/27 19:51:33 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,11 +91,9 @@ void	*remove_if(t_cmd_info *node, t_table *table)
 void	remove_dquote(t_cmd_info **node, t_table *table)
 {
 	int			i;
-	int			j;
 	t_cmd_info	*head;
 
 	i = 0;
-	j = 0;
 	while (node[i])
 	{
 		head = node[i];

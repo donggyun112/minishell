@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/26 22:06:31 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/27 20:20:06 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -396,9 +396,11 @@ int	run_builtin(t_command *tmp, char ***envp)
 		return (builtin_unset(tmp->cmd, envp));
 	else if (ft_strcmp(tmp->cmd[0], "env") == 0)
 		return (builtin_env(envp));
+	else if (ft_strcmp(tmp->cmd[0], "exit") == 0)
+			ft_exit(tmp, NULL);
 	// else if (ft_strcmp(tmp->cmd[0], "exit") == 0)
 	// 	return (builtin_exit(tmp, envp));
-	else
+	//else
 		return (1);
 }
 

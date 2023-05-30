@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   here_doc.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:56:28 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:56:35 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/30 22:30:42 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,11 @@ t_heredoc_fd	*check_heredoc(t_cmd_info **node, t_table *table)
 	int				fd;
 	t_cmd_info		*head;
 	t_heredoc_fd	*h_fd;
-
+	struct termios term;
+	
+	tcgetattr(STDIN_FILENO, &term);
+	term.c_lflag &= ~(ECHOCTL);
+	tcsetattr(STDIN_FILENO, TCSANOW, &term);
 	i = 0;
 	h_fd = NULL;
 	while (node[i])

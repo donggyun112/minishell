@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   replace_environment_variable.c                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:49:14 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:14:45 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/27 19:59:22 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,7 +104,7 @@ void	replace_environment_variable(t_cmd_info	**node, t_table *table)
 		tmp = NULL;
 		while (node[i])
 		{
-			if (check_is_quote(node[i]->data))
+			if (!check_is_quote(node[i]->data))
 				tmp = replace_val(node[i], table);
 			if (tmp && node[i]->type != quote)
 			{
