@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:30:10 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:19:56 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:51:59 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 int	word_count_(char const *s, char *c)
 {

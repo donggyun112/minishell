@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 03:02:40 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 11:08:35 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:52:10 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 char	**ft_putstring__(char const *s, char *c, char **arr)
 {

@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:17:38 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 12:35:40 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:54:51 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 int	count_command(t_cmd_info *node)
 {

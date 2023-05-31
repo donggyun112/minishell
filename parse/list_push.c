@@ -1,30 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   set_.c                                             :+:      :+:    :+:   */
+/*   list_push.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/26 21:31:37 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 05:03:03 by dongkseo         ###   ########.fr       */
+/*   Created: 2023/05/31 21:48:13 by dongkseo          #+#    #+#             */
+/*   Updated: 2023/05/31 23:44:24 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
-void	push_heredoc_fd(t_heredoc_fd **h_fd, int fd)
+void	push_fd(t_command **cmd_list, int infile, int outfile)
 {
-	t_heredoc_fd	*tmp;
-	t_heredoc_fd	*head;
+	t_command	*tmp;
+	t_command	*head;
 
-	tmp = (t_heredoc_fd *)malloc(sizeof(t_heredoc_fd));
-	tmp->fd = fd;
+	tmp = (t_command *)malloc(sizeof(t_command));
+	tmp->infile = infile;
+	tmp->outfile = outfile;
 	tmp->next = NULL;
-	if (*h_fd == NULL)
-		*h_fd = tmp;
+	if (!*cmd_list)
+		*cmd_list = tmp;
 	else
 	{
-		head = *h_fd;
+		head = *cmd_list;
 		while (head->next)
 			head = head->next;
 		head->next = tmp;
@@ -51,44 +52,43 @@ void	push_cmd(t_cmd_info **cmd, char *data, int type)
 	}
 }
 
-void	set_table(t_table *table)
+void	push_heredoc_fd(t_heredoc_fd **h_fd, int fd)
 {
-	table->cmd_count = 0;
-	table->fd_status = 0;
-	table->syntax_error = 0;
-	table->builtin_exit = 0;
-}
+	t_heredoc_fd	*tmp;
+	t_heredoc_fd	*head;
 
-void	push_fd(t_command **cmd_list, int infile, int outfile)
-{
-	t_command	*tmp;
-	t_command	*head;
-
-	tmp = (t_command *)malloc(sizeof(t_command));
-	tmp->infile = infile;
-	tmp->outfile = outfile;
+	tmp = (t_heredoc_fd *)malloc(sizeof(t_heredoc_fd));
+	tmp->fd = fd;
 	tmp->next = NULL;
-	if (!*cmd_list)
-		*cmd_list = tmp;
+	if (*h_fd == NULL)
+		*h_fd = tmp;
 	else
 	{
-		head = *cmd_list;
+		head = *h_fd;
 		while (head->next)
 			head = head->next;
 		head->next = tmp;
 	}
 }
 
-t_cmd_info	**set_cmd_list(t_table *table, t_tmp *list)
+void	push_front_t_cmd_info(t_cmd_info **node, \
+char *data, int num, t_cmd_info **head)
 {
-	int			i;
-	t_cmd_info	**tmp;
+	t_cmd_info	*tmp;
 
-	table->cmd_count = cmd_size(list);
-	tmp = (t_cmd_info **)malloc(sizeof(t_cmd_info *) * (table->cmd_count + 1));
-	tmp[table->cmd_count] = NULL;
-	i = -1;
-	while (++i < table->cmd_count)
-		tmp[i] = NULL;
-	return (tmp);
+	if (num == 0)
+	{
+		free((*node)->data);
+		(*node)->heredoc_flag = 0;
+		(*node)->type = 0;
+		(*node)->data = data;
+		return ;
+	}
+	tmp = (t_cmd_info *)malloc(sizeof(t_cmd_info));
+	tmp->data = data;
+	tmp->type = get_cmd_type(data);
+	tmp->heredoc_flag = unexpect_token;
+	tmp->next = *node;
+	*node = tmp;
+	*head = tmp;
 }

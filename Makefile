@@ -1,46 +1,48 @@
 NAME 	= minishell
 CC = cc
-CFLAGS = -Wall -Wextra -Werror #-fsanitize=address -g3
+CFLAGS = -Wall -Wextra -Werror -fsanitize=address -g3
 
 # NOTE: Add files
 # ================================================
 SRC 								= 	minishell \
-										check_inout_file  \
-										check_syntax_error \
 										execute \
-										free_func \
-										free_func2 \
 										ft_exit \
-										ft_split_divid_quote \
-										ft_split_divid_utils \
-										ft_split_divid_utils2 \
-										ft_split_operate_utils \
-										ft_split_operate \
-										ft_split_reamin_utils \
-										ft_split_remain_quote \
-										ft_split_remain_utils2 \
-										here_doc \
-										make_cmd_list \
-										make_command \
-										minishell_error_handle \
-										minishell_utils \
-										minishell_utils2 \
-										remove_dquote \
-										replace_argv_to_command \
-										replace_environment_variable \
-										set_ \
-										signal \
-										syntax_interpretation \
-										get_next_line \
-										get_next_line_utils \
-										set_2
+										new_split/ft_split_divid_quote \
+										new_split/ft_split_divid_utils \
+										new_split/ft_split_divid_utils2 \
+										new_split/ft_split_operate_utils \
+										new_split/ft_split_operate \
+										new_split/ft_split_reamin_utils \
+										new_split/ft_split_remain_quote \
+										new_split/ft_split_remain_utils2 \
+										parse/check_inout_file  \
+										parse/here_doc \
+										parse/check_syntax_error \
+										parse/check_syntax_error2 \
+										parse/make_cmd_list \
+										parse/make_command \
+										parse/minishell_utils \
+										parse/minishell_utils2 \
+										parse/remove_dquote \
+										parse/replace_argv_to_command \
+										parse/replace_environment_variable \
+										parse/syntax_interpretation \
+										parse/split_env_valid \
+										parse/list_push \
+										parse/set \
+										utils/free_func \
+										utils/free_func2 \
+										utils/get_next_line \
+										utils/get_next_line_utils \
+										utils/minishell_error_handle \
+										signal/signal \
 # ================================================
 
 SRC_CUR = $(addsuffix .c, $(SRC))
 LIBFT		= libft
 OBJ = $(SRC_CUR:.c=.o)
 HEAD 				= minishell.h
-HEAD_GET_NEXT_LINE 	= get_next_line.h
+HEAD_GET_NEXT_LINE 	= utils/get_next_line.h
 
 Black	=\033[0;30m
 Red		=\033[0;31m
@@ -80,7 +82,7 @@ $(NAME) : $(OBJ) $(HEAD)
 	@$(eval CURRENT_FILE=$(shell echo $$(($(CURRENT_FILE)+1))))
 
 clean :
-	@rm -rf *.o all bonus libft.a
+	@rm -rf new_split/*.o parse/*.o signal/*.o utils/*.o *.o all bonus libft.a
 	@printf "$(LF)🚧 $(Yellow)Cleaning...🚨 $(Purple)$(NAME)$(White) $(OBJ) \n$(DEF_COLOR) "
 	@make clean -C $(LIBFT)
 

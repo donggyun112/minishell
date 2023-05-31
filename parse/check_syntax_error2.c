@@ -1,30 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   set_2.c                                            :+:      :+:    :+:   */
+/*   check_syntax_error2.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/31 04:45:39 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 21:42:49 by dongkseo         ###   ########.fr       */
+/*   Created: 2023/05/31 23:47:39 by dongkseo          #+#    #+#             */
+/*   Updated: 2023/05/31 23:49:22 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
-void	check_sig(int fd, t_table *table)
+int	find_pipe(t_table *table, t_tmp *list)
 {
-	if (g_sig)
+	if (get_cmd_type(list->data) == pipe_)
 	{
-		dup2(fd, STDIN_FILENO);
-		table->exit_status = 1;
-		g_sig = 0;
+		table->syntax_error = 1;
+		return (1);
 	}
-	close(fd);
-}
-
-void	init_env_and_exit_status(t_table *table, char **env)
-{
-	table->exit_status = 0;
-	table->envp = copy_env(env);
+	while (list)
+	{
+		if (get_cmd_type(list->data) == pipe_)
+		{
+			if (!list->next || !ft_strcmp(list->data, "|"))
+			{
+				table->syntax_error = 1;
+				return (1);
+			}
+		}
+		list = list->next;
+	}
+	return (0);
 }

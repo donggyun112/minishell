@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/31 09:32:54 by jinhyeop         ###   ########.fr       */
+/*   Updated: 2023/05/31 23:42:01 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -698,7 +698,9 @@ void	exec_child(t_command *tmp, t_table *table)
 	exec_path = set_exec_path(envp, tmp->cmd);
 	is_dir(exec_path);
 	get_original_signal();
+	set_origterminal();
 	execve(exec_path, tmp->cmd, *envp);
+	set_terminal();
 	ft_putstr_fd("minishell: ", STDERR_FILENO);
 	perror(tmp->cmd[0]);
 	exit(1);

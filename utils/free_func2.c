@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:11:33 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:40:48 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 22:00:57 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	free_command(t_command **lst)
 {

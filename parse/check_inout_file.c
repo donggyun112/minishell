@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:28:31 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 02:08:51 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:55:35 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	replace_fd(t_command *cmd_list, int infile, int outfile)
 {

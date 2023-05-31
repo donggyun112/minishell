@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:24:26 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 21:42:43 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 23:45:50 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 char	**copy_env(char **env)
 {

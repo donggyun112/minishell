@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:41:10 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 11:11:05 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 23:45:39 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 int	check_unexpect_operator(t_tmp **list, t_table *table)
 {
@@ -101,8 +101,8 @@ t_cmd_info	**syntax_interpretation(t_tmp *list, t_table *table)
 			push_cmd(&tmp[i], ft_strdup(list->data), type);
 		else
 		{
-			if (!list->next)
-				table->syntax_error = 1;
+			if (find_pipe(table, list))
+				return (NULL);
 			i++;
 		}
 		list = list->next;

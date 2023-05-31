@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:24:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 21:42:25 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:52:03 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 int	env_quote_len(const char *s)
 {

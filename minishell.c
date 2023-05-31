@@ -6,12 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 21:36:04 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 23:43:36 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-#include "get_next_line.h"
 
 void	end_set(void)
 {
@@ -55,7 +54,6 @@ int	main(int ac, char *av[], char *env[])
 	char		*input_command;
 
 	init_env_and_exit_status(&table, env);
-	set_signal();
 	while (ac && av)
 	{
 		table.save_fd = dup(STDIN_FILENO);

@@ -1,40 +1,26 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_split_divid_utils.c                             :+:      :+:    :+:   */
+/*   ft_split_reamin_utils.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/26 20:22:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 11:01:23 by dongkseo         ###   ########.fr       */
+/*   Created: 2023/05/26 20:33:58 by dongkseo          #+#    #+#             */
+/*   Updated: 2023/05/31 21:51:52 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
-int	check_quote(const char *s)
+char	**ft_clearall_re(int j, char **arr)
 {
-	int	i;
-	int	_quote;
-	int	__quote;
-
-	i = 0;
-	_quote = 0;
-	__quote = 0;
-	while (s[i])
-	{
-		if (s[i] == '\'')
-			_quote++;
-		if (s[i] == '\"')
-			__quote++;
-		i++;
-	}
-	if (_quote % 2 == 0 || __quote % 2 == 0)
-		return (0);
-	return (1);
+	while (j > 0)
+		free(arr[--j]);
+	free(arr);
+	return (NULL);
 }
 
-int	is_exist__(char c, char *sep)
+int	is_exist___re(char c, char *sep)
 {
 	int	i;
 
@@ -48,36 +34,51 @@ int	is_exist__(char c, char *sep)
 	return (1);
 }
 
-int	is_quote(char c)
+int	is_quote_re(char c)
 {
 	if (c == '\'' || c == '\"')
 		return (0);
 	return (1);
 }
 
-int	quote_len(char const *s, char *c)
+int	quote_len_re(char const *s)
 {
 	int	i;
 
 	i = 0;
-	(void)c;
 	if (s[i] == '\'')
 	{
 		i++;
 		while (s[i] && s[i] != '\'')
 			i++;
-		if (!s[i])
-			return (i);
 		return (i + 1);
 	}
-	else if (s[i] == '\"')
+	else
 	{
 		i++;
 		while (s[i] && s[i] != '\"')
 			i++;
-		if (!s[i])
-			return (i);
 		return (i + 1);
 	}
-	return (i);
+}
+
+int	env_quote_len_re(const char *s)
+{
+	int	i;
+
+	i = 0;
+	if (s[i] == '$' && s[i + 1] == '\"')
+	{
+		i += 2;
+		while (s[i] && s[i] != '\"')
+			i++;
+		return (i + 1);
+	}
+	else
+	{
+		i += 2;
+		while (s[i] && s[i] != '\'')
+			i++;
+		return (i + 1);
+	}
 }

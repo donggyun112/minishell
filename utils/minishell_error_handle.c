@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:01:16 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:26:02 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 22:01:05 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	exit_error(char *error)
 {

@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:09:45 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 05:28:07 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 23:40:05 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	handler_int(int signal)
 {
@@ -22,6 +22,7 @@ void	handler_int(int signal)
 	{
 		if (g_sig == 1)
 		{
+			ft_putstr_fd("\n", STDOUT_FILENO);
 			close(STDIN_FILENO);
 			g_sig = 2;
 		}

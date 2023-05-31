@@ -6,12 +6,12 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:56:28 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 11:28:13 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 23:44:13 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
-#include "get_next_line.h"
+#include "../minishell.h"
+#include "../utils/get_next_line.h"
 
 void	write_heredoc(char *line, t_table *table, int infile, int type)
 {
@@ -68,6 +68,15 @@ void	set_terminal(void)
 
 	tcgetattr(STDIN_FILENO, &term);
 	term.c_lflag &= ~(ECHOCTL);
+	tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+
+void	set_origterminal(void)
+{
+	struct termios	term;
+
+	tcgetattr(STDIN_FILENO, &term);
+	term.c_lflag |= (ECHOCTL);
 	tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 

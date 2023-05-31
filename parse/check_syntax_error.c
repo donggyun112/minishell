@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:45:52 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 21:13:22 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 23:13:41 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 int	skip_quote(t_cmd_info *node, int *j)
 {
@@ -46,7 +46,8 @@ int	check_operator_(t_cmd_info *node, t_table *table)
 			if (skip_quote(node, &j))
 				return (0);
 		if (node->data[j] == ')' || node->data[j] == '(' \
-		|| node->data[j] == ';')
+		|| node->data[j] == ';' || node->data[j] == '\\' \
+		|| node->data[j] == '&')
 		{
 			table->syntax_error = 1;
 			node = head;

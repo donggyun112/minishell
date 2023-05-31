@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 21:41:10 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 23:47:16 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,6 +180,9 @@ int				check_quote_count(char *base);
 void			check_syntax_error(t_cmd_info **node, t_table *table);
 int				skip_quote(t_cmd_info *node, int *j);
 
+// check_syntax_error2
+int				find_pipe(t_table *table, t_tmp *list);
+
 // replace_argv_to_command
 
 void			replace_argv_to_command(t_cmd_info **cmd);
@@ -240,6 +243,8 @@ void			set_signal(void);
 void			handler_quit(int signal);
 void			handler_int(int signal);
 void			get_original_signal(void);
+void			set_terminal(void);
+void			set_origterminal(void);
 
 // make_command
 

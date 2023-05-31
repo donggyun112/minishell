@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   make_cmd_list.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:38:47 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/27 19:55:49 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:54:55 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	push_tmp(t_tmp **list, char *data)
 {

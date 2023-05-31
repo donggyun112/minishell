@@ -6,11 +6,11 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:49:14 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 21:41:14 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:54:36 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void	replace_val4(t_replace *d, int len)
 {

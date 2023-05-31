@@ -6,12 +6,12 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/05 12:33:32 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 04:21:30 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 22:01:15 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#include "minishell.h"
+#include "../minishell.h"
 
 int	make_str(int fd, t_tools *t, t_gnl *d)
 {
