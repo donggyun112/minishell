@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   remove_dquote.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:53:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/27 19:51:33 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 13:54:12 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,71 @@ char	*remove_env_dquote_2(char **base)
 	return (tmp);
 }
 
-void	*remove_if(t_cmd_info *node, t_table *table)
+int	remain_single(char *str)
+{
+	int		i;
+	char	tar;
+
+	i = 1;
+	tar = str[0];
+	while (str[i])
+	{
+		if (str[i] == tar)
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
+void	push_front_t_cmd_info(t_cmd_info **node, char *data, int num)
+{
+	t_cmd_info *tmp;
+
+	tmp = (t_cmd_info *)malloc(sizeof(t_cmd_info));
+	tmp->data = data;
+	tmp->type = get_cmd_type(data);
+	tmp->heredoc_flag = unexpect_token;
+	if (num == 0)
+	{
+		free((*node)->data);
+		(*node)->heredoc_flag = 0;
+		(*node)->type = 0;
+		*node = tmp;
+	}
+	else
+	{
+		tmp->next = *node;
+		*node = tmp;
+	}
+}
+
+void	divid_env_valid(char *str, t_cmd_info **node)
+{
+	char	**tmp;
+	int		i;
+	int		count;
+
+	if (get_cmd_type(str) == dquote || get_cmd_type(str) == quote)
+		return ;
+	tmp = ft_split(str, 32);
+	count = 0;
+	if (tmp != NULL && tmp[1] != NULL)
+	{
+		i = 0;
+		while (tmp[i])
+			i++;
+		i--;
+		while (i > 0)
+		{
+			push_front_t_cmd_info(node, tmp[i], count);
+			i--;
+			count++;
+		}
+	}
+	free_split(tmp);
+}
+
+void	*remove_if(t_cmd_info *node)
 {
 	char	*base;
 	char	**tmp;
@@ -68,13 +132,14 @@ void	*remove_if(t_cmd_info *node, t_table *table)
 	int		i;
 
 	base = node->data;
-	tmp = ft_split_divid_quote(base, "", table);
-	i = 0;
+	tmp = ft_split_divid_quote(base, "");
+	i = -1;
 	node->heredoc_flag = unexpect_token;
-	while (tmp[i])
+	while (tmp[++i])
 	{
 		tmp[i] = remove_env_dquote_2(&tmp[i]);
-		if (get_cmd_type(tmp[i]) == dquote || get_cmd_type(tmp[i]) == quote)
+		if ((get_cmd_type(tmp[i]) == dquote || get_cmd_type(tmp[i]) == quote) \
+		&& remain_single(tmp[i]))
 		{
 			if (node->type == redict_in)
 				node->heredoc_flag = special_heredoc;
@@ -82,13 +147,13 @@ void	*remove_if(t_cmd_info *node, t_table *table)
 			free(tmp[i]);
 			tmp[i] = ret;
 		}
-		i++;
+	//	divid_env_valid(tmp[i], &node);
 	}
 	link_quote(&node, tmp);
 	return (free_split(tmp));
 }
 
-void	remove_dquote(t_cmd_info **node, t_table *table)
+void	remove_dquote(t_cmd_info **node)
 {
 	int			i;
 	t_cmd_info	*head;
@@ -99,7 +164,7 @@ void	remove_dquote(t_cmd_info **node, t_table *table)
 		head = node[i];
 		while (node[i])
 		{
-			remove_if(node[i], table);
+			remove_if(node[i]);
 			node[i] = node[i]->next;
 		}
 		node[i] = head;

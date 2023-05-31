@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 04:45:46 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:26:06 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,6 @@ void	end_set(void)
 	ft_putstr_fd("\033[11C", STDOUT_FILENO);
 	ft_putstr_fd("exit\n", STDOUT_FILENO);
 }
-
-
 
 t_command	*parse(char *command_line, t_table *table)
 {
@@ -42,7 +40,7 @@ t_command	*parse(char *command_line, t_table *table)
 	replace_environment_variable(node, table);
 	if (table->syntax_error)
 		return (syntax_error__(table, &tmp1, &list, &node));
-	remove_dquote(node, table);
+	remove_dquote(node);
 	cmd_list = check_open_file(node, table);
 	free_all(&tmp1, &list, &node);
 	if (!table->syntax_error && !table->fd_status)

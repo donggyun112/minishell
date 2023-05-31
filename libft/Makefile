@@ -1,5 +1,5 @@
 CC = cc
-CFLAG = -Wall -Wextra -Werror
+CFLAG = -Wall -Wextra -Werror -fsanitize=address -g
 NAME = libft.a
 HEAD = libft.h
 SRC = ft_isalpha.c ft_toupper.c ft_isdigit.c ft_tolower.c ft_isalnum.c\

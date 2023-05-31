@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   replace_environment_variable.c                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:49:14 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/27 19:59:22 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 10:49:19 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,26 @@ char	*replace_val2(t_replace *d, int len)
 	return (d->tmp);
 }
 
+char	*ft_strchr_skip_quote(const char *string, int c)
+{
+	while (*string != (char)c)
+	{
+		if (*string == '\0')
+			return (0);
+		if (*string == '\'')
+		{
+			string++;
+			while (*string && *string != '\'')
+				string++;
+			if (!*string)
+				return (NULL);
+		}
+		string++;
+	}
+	return ((char *)string);
+}
+
+
 char	*replace_val(t_cmd_info	*node, t_table *table)
 {
 	t_replace	d;
@@ -75,7 +95,7 @@ char	*replace_val(t_cmd_info	*node, t_table *table)
 	d.ret = ft_strdup("");
 	while (1)
 	{
-		d.tmp = ft_strchr(d.base, '$');
+		d.tmp = ft_strchr_skip_quote(d.base, '$');
 		if (i++ == 0 && (!(d.tmp) || !*(d.tmp + 1)))
 			return (free_return_null(&d));
 		len = env_len(d.tmp, table);
@@ -104,8 +124,7 @@ void	replace_environment_variable(t_cmd_info	**node, t_table *table)
 		tmp = NULL;
 		while (node[i])
 		{
-			if (!check_is_quote(node[i]->data))
-				tmp = replace_val(node[i], table);
+			tmp = replace_val(node[i], table);
 			if (tmp && node[i]->type != quote)
 			{
 				free(node[i]->data);

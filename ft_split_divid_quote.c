@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 03:02:40 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:07:20 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:08:35 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ char	**ft_putstring__(char const *s, char *c, char **arr)
 		else
 			s++;
 	}
+	arr[j] = NULL;
 	return (arr);
 }
 
@@ -94,7 +95,7 @@ const char	*quote_string(const char *s)
 		return (s);
 }
 
-int	word_count__(char const *s, char *c, t_table *table)
+int	word_count__(char const *s, char *c)
 {
 	int			count;
 	const char	*his;
@@ -108,10 +109,7 @@ int	word_count__(char const *s, char *c, t_table *table)
 			his = s;
 			s = quote_string(s);
 			if (!s)
-			{
-				table->syntax_error = 1;
-				return (-1);
-			}
+				return (count);
 			if (his != s)
 				continue ;
 			while (*s && is_exist__(*s, c) && is_quote(*s))
@@ -123,15 +121,12 @@ int	word_count__(char const *s, char *c, t_table *table)
 	return (count);
 }
 
-char	**ft_split_divid_quote(char const *s, char *c, t_table *table)
+char	**ft_split_divid_quote(char const *s, char *c)
 {
 	char	**arr;
 	int		count;
 
-	table->syntax_error = 0;
-	count = word_count__(s, c, table);
-	if (count == -1)
-		return (NULL);
+	count = word_count__(s, c);
 	arr = (char **)malloc(sizeof(char *) * (count + 1));
 	if (!arr)
 		return (NULL);

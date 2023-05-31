@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:22:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/26 22:08:19 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:01:23 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,13 +66,18 @@ int	quote_len(char const *s, char *c)
 		i++;
 		while (s[i] && s[i] != '\'')
 			i++;
+		if (!s[i])
+			return (i);
 		return (i + 1);
 	}
-	else
+	else if (s[i] == '\"')
 	{
 		i++;
 		while (s[i] && s[i] != '\"')
 			i++;
+		if (!s[i])
+			return (i);
 		return (i + 1);
 	}
+	return (i);
 }

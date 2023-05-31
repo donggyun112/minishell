@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:56:28 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 04:36:56 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 11:28:13 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 void	write_heredoc(char *line, t_table *table, int infile, int type)
 {
 	t_cmd_info	node;
-	char		*tmp;
 
 	node.data = line;
 	if (type != special_heredoc)
@@ -25,16 +24,12 @@ void	write_heredoc(char *line, t_table *table, int infile, int type)
 		node.data = NULL;
 	if (!node.data)
 	{
-		tmp = ft_strjoin(line, "\n");
-		write(infile, tmp, ft_strlen(tmp));
-		free(tmp);
+		write(infile, line, ft_strlen(line));
 	}
 	else
 	{
-		tmp = ft_strjoin(node.data, "\n");
-		write(infile, tmp, ft_strlen(tmp));
+		write(infile, node.data, ft_strlen(node.data));
 		free(node.data);
-		free(tmp);
 	}	
 }
 

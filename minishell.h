@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 05:03:25 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 12:47:51 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,8 +131,8 @@ int				env_quote_len(const char *s);
 char			**ft_putstring__(char const *s, char *c, char **arr);
 const char		*check_env_quote(const char *s);
 const char		*quote_string(const char *s);
-int				word_count__(char const *s, char *c, t_table *table);
-char			**ft_split_divid_quote(char const *s, char *c, t_table *table);
+int				word_count__(char const *s, char *c);
+char			**ft_split_divid_quote(char const *s, char *c);
 
 // split_operator
 
@@ -195,8 +195,8 @@ void			replace_environment_variable(t_cmd_info	**node, t_table *table);
 // remove_quote
 
 char			*remove_env_dquote_2(char **base);
-void			*remove_if(t_cmd_info *node, t_table *table);
-void			remove_dquote(t_cmd_info **node, t_table *table);
+void			*remove_if(t_cmd_info *node);
+void			remove_dquote(t_cmd_info **node);
 void			link_quote(t_cmd_info **node, char **tmp);
 
 // check_open_file

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/31 06:25:02 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 09:32:54 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -468,18 +468,156 @@ int	print_export(char **envp)
 	return (0);
 }
 
-int builtin_export(t_command *tmp, char ***envp_addr)
+int	print_export_error(char *str, int *ret)
 {
-    char    **envp;
-    char    **cmd;
+	*ret = 1;
+	ft_putstr_fd("minishell: export: `", 2);
+	ft_putstr_fd(str, 2);
+	ft_putendl_fd("': not a valid identifier", 2);
+	return (1);
+}
 
-    envp = *envp_addr;
-    cmd = tmp->cmd;
-    if (cmd[1] == NULL)
-        return (print_export(envp));
-    else
-		return (0);
-        // return (add_env(cmd, envp_addr));
+void	export_add(char ***envp_addr, char *cmd)
+{
+	int		size;
+	int		idx;
+	char	**old_envp;
+	char	**new_envp;
+
+	old_envp = *envp_addr;
+	size = 0;
+	idx = 0;
+	while (old_envp[size])
+		size++;
+	new_envp = (char **)malloc(sizeof(char *) * (size + 2));
+	new_envp[size + 1] = NULL;
+	while (old_envp[idx] != NULL)
+	{
+		new_envp[idx] = ft_strdup(old_envp[idx]);
+		idx++;
+	}
+	new_envp[idx] = ft_strdup(cmd);
+	free_strarr(old_envp);
+	*envp_addr = new_envp;
+}
+
+void	add_value_exist(char *name, char *cmd, char ***envp_addr)
+{
+	char	**envp;
+	int		idx;
+	int		flag;
+
+	idx = 0;
+	flag = 0;
+	envp = *envp_addr;
+	while (envp[idx])
+	{
+		if (ft_strncmp(envp[idx], name, ft_strlen(name)) == 0)
+		{
+			if (envp[idx][ft_strlen(name)] == '\0'
+				|| envp[idx][ft_strlen(name)] == '=')
+			{
+				free(envp[idx]);
+				envp[idx] = ft_strdup(cmd);
+				flag = 1;
+				break ;
+			}
+		}
+		idx++;
+	}
+	if (flag == 0)
+		export_add(envp_addr, cmd);
+}
+
+void	add_no_value(char *cmd, char ***envp_addr)
+{
+	int		idx;
+	char	**envp;
+	int		flag;
+
+	idx = 0;
+	flag = 0;
+	envp = *envp_addr;
+	while (envp[idx])
+	{
+		if (ft_strncmp(envp[idx], cmd, ft_strlen(cmd)) == 0)
+		{
+			if (envp[idx][ft_strlen(cmd)] == '\0'
+				|| envp[idx][ft_strlen(cmd)] == '=')
+				flag = 1;
+		}
+		idx++;
+	}
+	if (flag == 0)
+		export_add(envp_addr, cmd);
+}
+
+void	add_env_list(char *cmd, char end, char ***envp_addr)
+{
+	char	*rename;
+	int		i;
+	int		j;
+	int		pos;
+
+	i = 0;
+	j = 0;
+	if (end != '\0' && end != '=')
+		return ;
+	rename = ft_strchr(cmd, '=');
+	if (rename)
+	{
+		pos = rename - cmd;
+		rename = ft_substr(cmd, 0, pos);
+		add_value_exist(rename, cmd, envp_addr);
+	}
+	else
+		add_no_value(cmd, envp_addr);
+}
+
+int	check_export_valid(char **cmd, char ***envp_addr)
+{
+	int	idx;
+	int	cursor;
+	int	ret;
+
+	idx = 0;
+	ret = 0;
+	while (cmd[++idx])
+	{
+		cursor = -1;
+		if (cmd[idx][0] == '=')
+		{
+			print_export_error(cmd[idx], &ret);
+			continue ;
+		}
+		while (cmd[idx][++cursor] && cmd[idx][cursor] != '=')
+		{
+			if (!(cmd[idx][cursor] == '_'
+				|| ((cmd[idx][cursor] >= 'a' && cmd[idx][cursor] <= 'z')
+					|| (cmd[idx][cursor] >= 'A' && cmd[idx][cursor] <= 'Z'))))
+				if (print_export_error(cmd[idx], &ret))
+					break ;
+		}
+		add_env_list(cmd[idx], cmd[idx][cursor], envp_addr);
+	}
+	return (ret);
+}
+
+int	builtin_export(t_command *tmp, char ***envp_addr)
+{
+	char	**envp;
+	char	**cmd;
+	int		ret;
+
+	envp = *envp_addr;
+	cmd = tmp->cmd;
+	if (cmd[1] == NULL)
+		return (print_export(envp));
+	else
+	{
+		ret = check_export_valid(tmp->cmd, envp_addr);
+		return (ret);
+	}
 }
 
 int	run_builtin(t_command *tmp, t_table *table)
