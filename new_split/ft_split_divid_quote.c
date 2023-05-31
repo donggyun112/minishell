@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 03:02:40 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 02:25:34 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 03:25:32 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ const char	*quote_string(const char *s)
 	if (*s == '\'')
 	{
 		s++;
-		s = quote_string2(s, '\"');
+		s = quote_string2(s, '\'');
 		return (s);
 	}
 	else if (*s == '\"')
