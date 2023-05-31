@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/31 23:47:39 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 23:49:22 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 02:26:34 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,21 @@ int	find_pipe(t_table *table, t_tmp *list)
 			}
 		}
 		list = list->next;
+	}
+	return (0);
+}
+
+int	is_single(char *tmp)
+{
+	int	i;
+
+	i = 0;
+	while (tmp[i])
+	{
+		if (i > 1 && tmp[i] == '$' && tmp[i - 2] == '\"'\
+		&& tmp[i - 1] == '\"' && tmp[i + 1] == '\"')
+			return (1);
+		i++;
 	}
 	return (0);
 }

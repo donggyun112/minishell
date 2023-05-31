@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 23:47:16 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 02:26:53 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,7 @@ const char		*check_env_quote(const char *s);
 const char		*quote_string(const char *s);
 int				word_count__(char const *s, char *c);
 char			**ft_split_divid_quote(char const *s, char *c);
+const char		*quote_string2(const char *s, char tar);
 
 // split_operator
 
@@ -182,6 +183,7 @@ int				skip_quote(t_cmd_info *node, int *j);
 
 // check_syntax_error2
 int				find_pipe(t_table *table, t_tmp *list);
+int				is_single(char *tmp);
 
 // replace_argv_to_command
 

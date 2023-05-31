@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:41:10 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 23:45:39 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 02:22:50 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,8 @@ char	*remove_env_dquote(char *tmp)
 		return (NULL);
 	if (tmp[i] == '$' && (tmp[i + 1] == '\"' || tmp[i + 1] == '\''))
 	{
+		if (tmp[ft_strlen(tmp) - 2] != '\"' && tmp[ft_strlen(tmp) - 2] != '\'')
+			return (NULL);
 		ret = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
 		free(tmp);
 		return (ret);

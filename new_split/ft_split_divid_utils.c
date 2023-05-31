@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:22:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 21:52:06 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 01:59:01 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,8 @@ int	quote_len(char const *s, char *c)
 	else if (s[i] == '\"')
 	{
 		i++;
+		if (s[i] == '\"')
+			i++;
 		while (s[i] && s[i] != '\"')
 			i++;
 		if (!s[i])

@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/31 21:34:48 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 21:54:31 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 01:01:08 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,10 @@ void	divid_env_valid(char *str, t_cmd_info **node, t_cmd_info **head)
 	char		**tmp;
 	int			i;
 	int			count;
-	t_cmd_info	*node1;
 
 	tmp = ft_split(str, ' ');
-	node1 = *node;
 	count = 0;
-	if (tmp != NULL && tmp[1] != NULL)
+	if (tmp != NULL && tmp[0] != NULL && tmp[1] != NULL)
 	{
 		i = 0;
 		while (tmp[i])
