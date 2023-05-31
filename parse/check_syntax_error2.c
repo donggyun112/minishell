@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/31 23:47:39 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 02:26:34 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 02:36:54 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,11 @@
 
 int	find_pipe(t_table *table, t_tmp *list)
 {
-	if (get_cmd_type(list->data) == pipe_)
-	{
-		table->syntax_error = 1;
-		return (1);
-	}
 	while (list)
 	{
 		if (get_cmd_type(list->data) == pipe_)
 		{
-			if (!list->next || !ft_strcmp(list->data, "|"))
+			if (!list->next || !ft_strcmp(list->next->data, "|"))
 			{
 				table->syntax_error = 1;
 				return (1);

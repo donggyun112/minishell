@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:41:10 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 02:22:50 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 02:32:43 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ t_cmd_info	**syntax_interpretation(t_tmp *list, t_table *table)
 	int			i;
 
 	i = 0;
-	if (!list)
+	if (!list || get_cmd_type(list->data) == pipe_)
 		return (NULL);
 	tmp = set_cmd_list(table, list);
 	while (list)

@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 02:24:46 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 02:34:07 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ t_command	*parse(char *command_line, t_table *table)
 	list = split_divid_operator(tmp1, table);
 	node = syntax_interpretation(list, table);
 	check_syntax_error(node, table);
-	if (table->syntax_error)
+	if (table->syntax_error || !node)
 		return (syntax_error__(table, &tmp1, &list, &node));
 	replace_argv_to_command(node);
 	replace_environment_variable(node, table);
