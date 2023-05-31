@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 12:47:51 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:41:10 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -195,7 +195,7 @@ void			replace_environment_variable(t_cmd_info	**node, t_table *table);
 // remove_quote
 
 char			*remove_env_dquote_2(char **base);
-void			*remove_if(t_cmd_info *node);
+void			*remove_if(t_cmd_info **node, t_cmd_info **head);
 void			remove_dquote(t_cmd_info **node);
 void			link_quote(t_cmd_info **node, char **tmp);
 
@@ -259,6 +259,7 @@ int				check_quote_heredoc(char *line);
 int				ft_strcmp(char *s1, char *s2);
 int				check_whitespace(const char *command);
 char			**copy_env(char **env);
+char			*ft_strchr_skip_quote(const char *string, int c);
 
 // check_inout_file
 
@@ -289,5 +290,9 @@ void			init_env_and_exit_status(t_table *table, char **env);
 //execute
 char			*ft_getenv(char *name, char **envp);
 void			execute(t_command **cmd, t_table *table);
-
+//split_env_valid
+void			push_front_t_cmd_info(t_cmd_info **node, \
+char *data, int num, t_cmd_info **head);
+void			divid_env_valid(char *str, \
+t_cmd_info **node, t_cmd_info **head);
 #endif

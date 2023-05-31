@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:53:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 13:54:12 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:37:31 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@ void	link_quote(t_cmd_info **node, char **tmp)
 	char	*buff;
 
 	i = 0;
+	if (!tmp || tmp[1] == NULL)
+		return ;
 	free((*node)->data);
 	ret = ft_strdup("");
 	while (tmp[i])
@@ -76,80 +78,31 @@ int	remain_single(char *str)
 	return (0);
 }
 
-void	push_front_t_cmd_info(t_cmd_info **node, char *data, int num)
+void	*remove_if(t_cmd_info **node, t_cmd_info **head)
 {
-	t_cmd_info *tmp;
-
-	tmp = (t_cmd_info *)malloc(sizeof(t_cmd_info));
-	tmp->data = data;
-	tmp->type = get_cmd_type(data);
-	tmp->heredoc_flag = unexpect_token;
-	if (num == 0)
-	{
-		free((*node)->data);
-		(*node)->heredoc_flag = 0;
-		(*node)->type = 0;
-		*node = tmp;
-	}
-	else
-	{
-		tmp->next = *node;
-		*node = tmp;
-	}
-}
-
-void	divid_env_valid(char *str, t_cmd_info **node)
-{
-	char	**tmp;
-	int		i;
-	int		count;
-
-	if (get_cmd_type(str) == dquote || get_cmd_type(str) == quote)
-		return ;
-	tmp = ft_split(str, 32);
-	count = 0;
-	if (tmp != NULL && tmp[1] != NULL)
-	{
-		i = 0;
-		while (tmp[i])
-			i++;
-		i--;
-		while (i > 0)
-		{
-			push_front_t_cmd_info(node, tmp[i], count);
-			i--;
-			count++;
-		}
-	}
-	free_split(tmp);
-}
-
-void	*remove_if(t_cmd_info *node)
-{
-	char	*base;
 	char	**tmp;
 	char	*ret;
 	int		i;
 
-	base = node->data;
-	tmp = ft_split_divid_quote(base, "");
+	tmp = ft_split_divid_quote((*node)->data, "");
 	i = -1;
-	node->heredoc_flag = unexpect_token;
+	(*node)->heredoc_flag = unexpect_token;
 	while (tmp[++i])
 	{
 		tmp[i] = remove_env_dquote_2(&tmp[i]);
 		if ((get_cmd_type(tmp[i]) == dquote || get_cmd_type(tmp[i]) == quote) \
 		&& remain_single(tmp[i]))
 		{
-			if (node->type == redict_in)
-				node->heredoc_flag = special_heredoc;
+			if ((*node)->type == redict_in)
+				(*node)->heredoc_flag = special_heredoc;
 			ret = ft_substr(tmp[i], 1, ft_strlen(tmp[i]) - 2);
 			free(tmp[i]);
 			tmp[i] = ret;
 		}
-	//	divid_env_valid(tmp[i], &node);
+		else
+			divid_env_valid(tmp[i], node, head);
 	}
-	link_quote(&node, tmp);
+	link_quote(node, tmp);
 	return (free_split(tmp));
 }
 
@@ -164,7 +117,7 @@ void	remove_dquote(t_cmd_info **node)
 		head = node[i];
 		while (node[i])
 		{
-			remove_if(node[i]);
+			remove_if(&node[i], &head);
 			node[i] = node[i]->next;
 		}
 		node[i] = head;

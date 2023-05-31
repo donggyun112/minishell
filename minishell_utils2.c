@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:24:26 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 03:35:35 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:42:43 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,4 +68,23 @@ int	cmd_size(t_tmp *list)
 		list = list->next;
 	}
 	return (count);
+}
+
+char	*ft_strchr_skip_quote(const char *string, int c)
+{
+	while (*string != (char)c)
+	{
+		if (*string == '\0')
+			return (0);
+		if (*string == '\'')
+		{
+			string++;
+			while (*string && *string != '\'')
+				string++;
+			if (!*string)
+				return (NULL);
+		}
+		string++;
+	}
+	return ((char *)string);
 }

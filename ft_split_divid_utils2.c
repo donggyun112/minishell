@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:24:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 11:06:42 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:42:25 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@ int	string_len__(char const *s, char *c)
 	int	len;
 
 	len = 0;
-	
 	if (s[len] == '$' && s[len + 1] && (s[len + 1] == '\"'\
 	|| s[len + 1] == '\''))
 		len = env_quote_len(s);
@@ -46,7 +45,6 @@ int	string_len__(char const *s, char *c)
 		len = quote_len(s, c);
 	else
 	{
-
 		while (s[len] && is_exist__(s[len], c) && is_quote(s[len]))
 		{
 			if (s[len] == '$' && s[len + 1] && (s[len + 1] == '\"'\

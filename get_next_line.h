@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/08 15:41:40 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 04:19:25 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:39:45 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,6 @@ typedef struct s_gnl
 	char	*tmp3;
 	char	buff[BUFFER_SIZE + 1];
 }	t_gnl;
-
-
 
 char	*get_next_line(int fd);
 size_t	ft_strlen_gnl(char *str);

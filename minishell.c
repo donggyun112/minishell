@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 11:26:06 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/05/31 21:36:04 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,6 @@ t_command	*parse(char *command_line, t_table *table)
 		table->exit_status = 0;
 	return (cmd_list);
 }
-
-
 
 int	main(int ac, char *av[], char *env[])
 {
