@@ -6,11 +6,11 @@
 /*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/06/02 00:30:55 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/02 00:32:36 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 #include <sys/stat.h>
 
 void	exit_processor_error(t_command **cmd)

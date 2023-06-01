@@ -3,10 +3,12 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror # -fsanitize=address -g3
 
 # NOTE: Add files
+
+# excute 폴더 안에 실행파일 나누어서 넣어주시면 되고 헤더는 ../minishell.h로 맞춰주세요
 # ================================================
 SRC 								= 	minishell \
-										execute \
-										ft_exit \
+										excute/execute \
+										excute/ft_exit \
 										new_split/ft_split_divid_quote \
 										new_split/ft_split_divid_utils \
 										new_split/ft_split_divid_utils2 \
