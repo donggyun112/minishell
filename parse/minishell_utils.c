@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:08:05 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 19:16:38 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/02 01:03:16 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,8 @@ int	env_len(char *str, t_table *table)
 		while (str[i] && str[i] != 32 && !(str[i] > 9 && str[i] < 13) \
 		&& str[i] != '$')
 		{
-			if (!((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'a'\
-			&& str[i] <= 'z') || (str[i] >= 'A' && str[i] <= 'Z')))
+			if (!((str[i] >= '0' && str[i] <= '9') || (str[i] >= 'a'&& str[i] \
+			<= 'z') || (str[i] >= 'A' && str[i] <= 'Z') || str[i] == '_'))
 				return (i);
 			i++;
 		}

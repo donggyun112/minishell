@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split_divid_quote.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/23 03:02:40 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 16:23:22 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/02 00:52:33 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,8 +82,8 @@ const char	*quote_string(const char *s)
 	else if (*s == '\"')
 	{
 		s++;
-		if (*s == '\"')
-			s++;
+		/* if (*s == '\"')
+			s++; */
 		s = quote_string2(s, '\"');
 		return (s);
 	}
