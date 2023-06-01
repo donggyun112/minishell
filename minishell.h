@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 02:26:53 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 08:23:21 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,8 +236,9 @@ void			free_all(char ***tmp, t_tmp **list, t_cmd_info ***node);
 
 // ft_exit
 
-void			ft_exit(t_command *command, t_table *table);
-void			exit_status(t_table *table, int j, t_command *command);
+void			ft_exit(pid_t pid, t_command *command, t_table *table);
+void			exit_status(pid_t pid, t_table *table, int j, \
+	t_command *command);
 int				command_size(t_command *command);
 
 // signal

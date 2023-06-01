@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/05/31 23:42:01 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 08:41:19 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,24 @@ char	*set_exec_path(char ***envp_addr, char **cmd)
 	return (NULL);
 }
 
+int	echo_option_n(char *option)
+{
+	int	idx;
+
+	idx = 0;
+	if (option[idx] != '-')
+		return (0);
+	else
+		idx++;
+	while (option[idx])
+	{
+		if (option[idx] != 'n')
+			return (0);
+		idx++;
+	}
+	return (1);
+}
+
 int	builtin_echo(t_command *tmp)
 {
 	char	**cmd;
@@ -158,7 +176,7 @@ int	builtin_echo(t_command *tmp)
 	idx = 1;
 	opt = 0;
 	cmd = tmp->cmd;
-	if (cmd[1] != NULL && ft_strcmp(cmd[1], "-n") == 0)
+	if (cmd[1] != NULL && echo_option_n(cmd[1]))
 	{
 		idx++;
 		opt = 1;
@@ -569,6 +587,7 @@ void	add_env_list(char *cmd, char end, char ***envp_addr)
 		pos = rename - cmd;
 		rename = ft_substr(cmd, 0, pos);
 		add_value_exist(rename, cmd, envp_addr);
+		free(rename);
 	}
 	else
 		add_no_value(cmd, envp_addr);
@@ -620,7 +639,7 @@ int	builtin_export(t_command *tmp, char ***envp_addr)
 	}
 }
 
-int	run_builtin(t_command *tmp, t_table *table)
+int	run_builtin(pid_t pid, t_command *tmp, t_table *table)
 {
 	if (tmp->infile < 0 || tmp->outfile < 0)
 		return (127);
@@ -638,8 +657,8 @@ int	run_builtin(t_command *tmp, t_table *table)
 		return (builtin_env(&(table->envp)));
 	else if (ft_strcmp(tmp->cmd[0], "exit") == 0)
 	{
-		ft_exit(tmp, table);
-		return (0);
+		ft_exit(pid, tmp, table);
+		return (table->exit_status);
 	}
 	else
 		return (1);
@@ -683,7 +702,7 @@ void	is_dir(char *exec_path)
 	}
 }
 
-void	exec_child(t_command *tmp, t_table *table)
+void	exec_child(pid_t pid, t_command *tmp, t_table *table)
 {
 	char	*exec_path;
 	char	***envp;
@@ -692,7 +711,7 @@ void	exec_child(t_command *tmp, t_table *table)
 	if (tmp->next == NULL && tmp->num_of_cmd == 0 && check_builtin(tmp))
 		exit(0);
 	else if (check_builtin(tmp) == 1)
-		exit(run_builtin(tmp, table));
+		exit(run_builtin(pid, tmp, table));
 	if (tmp->infile < 0 || tmp->outfile < 0)
 		exit(1);
 	exec_path = set_exec_path(envp, tmp->cmd);
@@ -706,7 +725,7 @@ void	exec_child(t_command *tmp, t_table *table)
 	exit(1);
 }
 
-void	exec_parent(t_fd *fds, t_command *tmp, t_table *table)
+void	exec_parent(pid_t pid, t_fd *fds, t_command *tmp, t_table *table)
 {
 	char	***envp;
 
@@ -718,7 +737,7 @@ void	exec_parent(t_fd *fds, t_command *tmp, t_table *table)
 	close(fds->fd[1]);
 	if (tmp->next == NULL && tmp->num_of_cmd == 0 && check_builtin(tmp))
 	{
-		table->builtin_exit = run_builtin(tmp, table);
+		table->builtin_exit = run_builtin(pid, tmp, table);
 		reset_fd(fds);
 	}
 }
@@ -731,7 +750,7 @@ void	exec_cmd(pid_t pid, t_fd *fds, t_command *tmp, t_table *table)
 			exit (0);
 		else if (tmp->cmd == NULL)
 			exit (1);
-		exec_child(tmp, table);
+		exec_child(pid, tmp, table);
 	}
 	else
 	{
@@ -745,7 +764,7 @@ void	exec_cmd(pid_t pid, t_fd *fds, t_command *tmp, t_table *table)
 			table->exit_status = 1;
 			return ;
 		}
-		exec_parent(fds, tmp, table);
+		exec_parent(pid, fds, tmp, table);
 	}
 }
 
