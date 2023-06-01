@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/06/01 17:28:28 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/02 00:30:55 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -573,12 +573,8 @@ void	add_no_value(char *cmd, char ***envp_addr)
 void	add_env_list(char *cmd, char end, char ***envp_addr)
 {
 	char	*rename;
-	int		i;
-	int		j;
 	int		pos;
 
-	i = 0;
-	j = 0;
 	if (end != '\0' && end != '=')
 		return ;
 	rename = ft_strchr(cmd, '=');
@@ -719,7 +715,6 @@ void	exec_child(pid_t pid, t_command *tmp, t_table *table)
 	get_original_signal();
 	set_origterminal();
 	execve(exec_path, tmp->cmd, *envp);
-	set_terminal();
 	ft_putstr_fd("minishell: ", STDERR_FILENO);
 	perror(tmp->cmd[0]);
 	exit(1);
@@ -727,9 +722,6 @@ void	exec_child(pid_t pid, t_command *tmp, t_table *table)
 
 void	exec_parent(pid_t pid, t_fd *fds, t_command *tmp, t_table *table)
 {
-	char	***envp;
-
-	envp = &(table->envp);
 	if (tmp->infile > 0)
 		close(tmp->infile);
 	if (tmp->next != NULL && tmp->next->infile == 0)

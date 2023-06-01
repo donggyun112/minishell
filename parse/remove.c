@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   remove.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 19:54:11 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 19:54:53 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 23:36:11 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ void	re_place_get(t_remove_vaild	*d, t_table *table, t_cmd_info *tmp2, int i)
 	(*d).tmp3 = replace_val(tmp2, table, (*d).flag);
 	if ((*d).tmp3)
 	{
+		free((*d).tmp[i]);
 		(*d).tmp[i] = (*d).tmp3;
 		(*d).flag = 0;
 	}
