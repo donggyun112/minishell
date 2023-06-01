@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 08:23:21 by jinhyeop         ###   ########.fr       */
+/*   Updated: 2023/06/01 16:36:59 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ typedef struct s_cmd_info
 {
 	char				*data;
 	int					type;
+	int					replace_index;
 	int					heredoc_flag;
 	struct s_cmd_info	*next;
 }	t_cmd_info;
@@ -175,7 +176,8 @@ int				check_unexpect_operator(t_tmp **list, t_table *table);
 
 // check_syntax_error
 
-int				check_operator_(t_cmd_info *node, t_table *table);
+int				check_operator_(t_cmd_info **node, t_table *table, \
+t_cmd_info *head);
 int				check_quote_count2(char *base, int *i, char tar);
 int				check_quote_count(char *base);
 void			check_syntax_error(t_cmd_info **node, t_table *table);

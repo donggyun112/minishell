@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:45:52 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 23:13:41 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 16:35:22 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,24 +33,22 @@ int	skip_quote(t_cmd_info *node, int *j)
 	return (0);
 }
 
-int	check_operator_(t_cmd_info *node, t_table *table)
+int	check_operator_(t_cmd_info **node, t_table *table, t_cmd_info *head)
 {
 	int			j;
-	t_cmd_info	*head;
 
 	j = 0;
-	head = node;
-	while (node->data[j])
+	while ((*node)->data[j])
 	{
-		if (node->data[j] == '\'' || node->data[j] == '\"')
-			if (skip_quote(node, &j))
+		if ((*node)->data[j] == '\'' || (*node)->data[j] == '\"')
+			if (skip_quote((*node), &j))
 				return (0);
-		if (node->data[j] == ')' || node->data[j] == '(' \
-		|| node->data[j] == ';' || node->data[j] == '\\' \
-		|| node->data[j] == '&')
+		if ((*node)->data[j] == ')' || (*node)->data[j] == '(' \
+		|| (*node)->data[j] == ';' || (*node)->data[j] == '\\' \
+		|| (*node)->data[j] == '&')
 		{
 			table->syntax_error = 1;
-			node = head;
+			*node = head;
 			return (1);
 		}
 		j++;
@@ -115,7 +113,7 @@ void	check_syntax_error(t_cmd_info **node, t_table *table)
 				return ;
 			}
 			if (node[i]->type != dquote && node[i]->type != quote)
-				if (check_operator_(node[i], table))
+				if (check_operator_(&node[i], table, head))
 					return ;
 			node[i] = node[i]->next;
 		}
