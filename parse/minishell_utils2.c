@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:24:26 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 03:30:41 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 18:34:40 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,7 @@ int	cmd_size(t_tmp *list)
 	return (count);
 }
 
-char	*ft_strchr_skip_quote(const char *string, int c)
+char	*ft_strchr_skip_quote(const char *string, int c, int flag2)
 {
 	int	flag;
 
@@ -81,7 +81,7 @@ char	*ft_strchr_skip_quote(const char *string, int c)
 			return (0);
 		if (*string == '\"')
 			flag = 1;
-		if (flag != 1 && *string == '\'')
+		if (flag != 1 && *string == '\'' && flag2 != 2)
 		{
 			string++;
 			while (*string && *string != '\'')

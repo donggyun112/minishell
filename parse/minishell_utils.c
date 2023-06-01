@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 21:08:05 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 15:30:08 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 19:16:38 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ char	*vaild_check(int i, char **base)
 	tmp = *base;
 	if (is_single(tmp))
 		return (NULL);
-	if (i > 0 && (tmp[i - 1] == '\"' || tmp[i - 1] == '\''))
+	if ((check_d(tmp, i, '\'') || check_d(tmp, i, '\"')))
 		tmp2 = ft_strdup("$");
 	else
 	{

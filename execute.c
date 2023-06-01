@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/21 18:23:00 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/06/01 08:41:19 by jinhyeop         ###   ########.fr       */
+/*   Updated: 2023/06/01 17:28:28 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,7 +176,7 @@ int	builtin_echo(t_command *tmp)
 	idx = 1;
 	opt = 0;
 	cmd = tmp->cmd;
-	if (cmd[1] != NULL && echo_option_n(cmd[1]))
+	while (cmd[idx] && echo_option_n(cmd[idx]))
 	{
 		idx++;
 		opt = 1;

@@ -1,6 +1,6 @@
 NAME 	= minishell
 CC = cc
-CFLAGS = -Wall -Wextra -Werror # -fsanitize=address -g3
+CFLAGS = -Wall -Wextra -Werror -fsanitize=address -g3
 
 # NOTE: Add files
 # ================================================
@@ -17,13 +17,16 @@ SRC 								= 	minishell \
 										new_split/ft_split_remain_utils2 \
 										parse/check_inout_file  \
 										parse/here_doc \
+										parse/here_doc2 \
 										parse/check_syntax_error \
 										parse/check_syntax_error2 \
 										parse/make_cmd_list \
 										parse/make_command \
 										parse/minishell_utils \
 										parse/minishell_utils2 \
+										parse/minishell_utils3 \
 										parse/remove_dquote \
+										parse/remove \
 										parse/replace_argv_to_command \
 										parse/replace_environment_variable \
 										parse/syntax_interpretation \

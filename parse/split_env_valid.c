@@ -6,13 +6,14 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/31 21:34:48 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 01:01:08 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 19:33:54 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	divid_env_valid(char *str, t_cmd_info **node, t_cmd_info **head)
+void	divid_env_valid(char *str, t_cmd_info **node, \
+int *flag)
 {
 	char		**tmp;
 	int			i;
@@ -24,14 +25,12 @@ void	divid_env_valid(char *str, t_cmd_info **node, t_cmd_info **head)
 	{
 		i = 0;
 		while (tmp[i])
-			i++;
-		i--;
-		while (i >= 0)
 		{
-			push_front_t_cmd_info(node, ft_strdup(tmp[i]), count, head);
-			i--;
+			push_front_t_cmd_info(node, ft_strdup(tmp[i]), count);
+			i++;
 			count++;
 		}
+		*flag = 1;
 	}
 	free_split(tmp);
 }

@@ -1,45 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   check_syntax_error2.c                              :+:      :+:    :+:   */
+/*   minishell_utils3.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/31 23:47:39 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 18:21:51 by dongkseo         ###   ########.fr       */
+/*   Created: 2023/06/01 19:16:26 by dongkseo          #+#    #+#             */
+/*   Updated: 2023/06/01 19:39:55 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	find_pipe(t_table *table, t_tmp *list)
+int	check_d(char *tmp, int i, char tar)
 {
-	while (list)
-	{
-		if (get_cmd_type(list->data) == pipe_)
-		{
-			if (!list->next || !ft_strcmp(list->next->data, "|"))
-			{
-				table->syntax_error = 1;
-				return (1);
-			}
-		}
-		list = list->next;
-	}
-	return (0);
-}
-
-int	is_single(char *tmp)
-{
-	int	i;
-
-	i = 0;
-	while (tmp[i])
-	{
-		if (i > 1 && tmp[i] == '$' && tmp[i - 2] == '\"'\
-		&& tmp[i - 1] == '\"' && tmp[i + 1] == '\"')
-			return (1);
-		i++;
-	}
+	if (i > 2 && tmp[i - 1] == tar && tmp[i + 1] == tar)
+		return (1);
 	return (0);
 }

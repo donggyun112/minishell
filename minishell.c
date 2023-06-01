@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/10 19:01:22 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 16:37:20 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 19:15:02 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,9 @@ t_command	*parse(char *command_line, t_table *table)
 	if (table->syntax_error || !node)
 		return (syntax_error__(table, &tmp1, &list, &node));
 	replace_argv_to_command(node);
-	replace_environment_variable(node, table);
+	remove_dquote(node, table);
 	if (table->syntax_error)
 		return (syntax_error__(table, &tmp1, &list, &node));
-	remove_dquote(node);
 	cmd_list = check_open_file(node, table);
 	free_all(&tmp1, &list, &node);
 	if (!table->syntax_error && !table->fd_status)

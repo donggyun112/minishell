@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/31 21:48:13 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 23:44:24 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 20:31:26 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,9 +72,11 @@ void	push_heredoc_fd(t_heredoc_fd **h_fd, int fd)
 }
 
 void	push_front_t_cmd_info(t_cmd_info **node, \
-char *data, int num, t_cmd_info **head)
+char *data, int num)
 {
 	t_cmd_info	*tmp;
+	t_cmd_info	*tmp2;
+	t_cmd_info	*head;
 
 	if (num == 0)
 	{
@@ -84,11 +86,14 @@ char *data, int num, t_cmd_info **head)
 		(*node)->data = data;
 		return ;
 	}
+	head = (*node);
+	/* while (num-- > 1)
+		head = head->next; */
+	tmp2 = head;
 	tmp = (t_cmd_info *)malloc(sizeof(t_cmd_info));
 	tmp->data = data;
 	tmp->type = get_cmd_type(data);
 	tmp->heredoc_flag = unexpect_token;
-	tmp->next = *node;
-	*node = tmp;
-	*head = tmp;
+	tmp->next = tmp2;
+	(*node)->next = tmp;
 }

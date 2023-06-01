@@ -3,64 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   here_doc.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:56:28 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 23:44:13 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 19:30:01 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
-#include "../utils/get_next_line.h"
-
-void	write_heredoc(char *line, t_table *table, int infile, int type)
-{
-	t_cmd_info	node;
-
-	node.data = line;
-	if (type != special_heredoc)
-		node.data = replace_val(&node, table);
-	else
-		node.data = NULL;
-	if (!node.data)
-	{
-		write(infile, line, ft_strlen(line));
-	}
-	else
-	{
-		write(infile, node.data, ft_strlen(node.data));
-		free(node.data);
-	}	
-}
-
-int	init_here_doc_data(char *limits, t_table *table, int type)
-{
-	int		fd;
-	char	*line;
-	int		infile;
-
-	if (g_sig == 2)
-		return (-1);
-	fd = open("/tmp/sh-thd-1641928925", \
-	O_WRONLY | O_CREAT | O_EXCL | O_TRUNC, 0600);
-	infile = dup(fd);
-	while (1)
-	{
-		line = get_next_line(0);
-		if (!line || ft_strncmp(line, limits, ft_strlen(line) - 1) == 0)
-		{
-			free(line);
-			break ;
-		}
-		write_heredoc(line, table, infile, type);
-		free(line);
-	}
-	close(infile);
-	infile = open("/tmp/sh-thd-1641928925", O_RDONLY);
-	close(fd);
-	unlink("/tmp/sh-thd-1641928925");
-	return (infile);
-}
 
 void	set_terminal(void)
 {

@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 16:36:59 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 19:55:43 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,15 @@ typedef struct s_replace
 	char	*tar;
 	char	*ret;
 }	t_replace;
+
+typedef struct s_remove_vaild
+{
+	char		*ret;
+	char		**tmp;
+	char		*tmp3;
+	int			flag;
+	int			flag2;
+}	t_remove_vaild;
 
 typedef enum s_type
 {
@@ -196,15 +205,14 @@ void			replace_argv_to_command(t_cmd_info **cmd);
 void			replace_val4(t_replace *d, int len);
 void			replace_val3(t_replace *d, t_table *table);
 char			*replace_val2(t_replace *d, int len);
-char			*replace_val(t_cmd_info	*node, t_table *table);
-void			replace_environment_variable(t_cmd_info	**node, t_table *table);
+char			*replace_val(t_cmd_info	*node, t_table *table, int flag);
 
 // remove_quote
 
 char			*remove_env_dquote_2(char **base);
-void			*remove_if(t_cmd_info **node, t_cmd_info **head);
-void			remove_dquote(t_cmd_info **node);
-void			link_quote(t_cmd_info **node, char **tmp);
+void			*remove_if(t_cmd_info **node, t_table *table);
+void			remove_dquote(t_cmd_info **node, t_table *table);
+void			link_quote(t_cmd_info **node, char **tmp, int flag);
 
 // check_open_file
 
@@ -213,6 +221,7 @@ int				init_here_doc_data(char *limits, t_table *table, int type);
 t_heredoc_fd	*check_heredoc(t_cmd_info **node, t_table *table);
 t_command		*check_open_file(t_cmd_info **node, t_table *table);
 void			push_heredoc_fd(t_heredoc_fd **h_fd, int fd);
+int				init_here_doc_data(char *limits, t_table *table, int type);
 
 // minishell_error_handle
 
@@ -269,7 +278,7 @@ int				check_quote_heredoc(char *line);
 int				ft_strcmp(char *s1, char *s2);
 int				check_whitespace(const char *command);
 char			**copy_env(char **env);
-char			*ft_strchr_skip_quote(const char *string, int c);
+char			*ft_strchr_skip_quote(const char *string, int c, int flag);
 
 // check_inout_file
 
@@ -302,7 +311,17 @@ char			*ft_getenv(char *name, char **envp);
 void			execute(t_command **cmd, t_table *table);
 //split_env_valid
 void			push_front_t_cmd_info(t_cmd_info **node, \
-char *data, int num, t_cmd_info **head);
+char *data, int num);
 void			divid_env_valid(char *str, \
-t_cmd_info **node, t_cmd_info **head);
+t_cmd_info **node, int *flag);
+
+// minishell utils3
+
+int				check_d(char *tmp, int i, char tar);
+
+// remove
+
+void			remove_quote_or_dquote(t_remove_vaild *d, t_cmd_info **node, int i);
+void			re_place_get(t_remove_vaild	*d, t_table *table, t_cmd_info *tmp2, int i);
+
 #endif

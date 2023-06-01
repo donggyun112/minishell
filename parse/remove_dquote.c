@@ -6,19 +6,21 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:53:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 16:22:43 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 19:54:02 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	link_quote(t_cmd_info **node, char **tmp)
+void	link_quote(t_cmd_info **node, char **tmp, int flag)
 {
 	int		i;
 	char	*ret;
 	char	*buff;
 
 	i = 0;
+	if (flag)
+		return ;
 	free((*node)->data);
 	ret = ft_strdup("");
 	while (tmp[i])
@@ -76,35 +78,35 @@ int	remain_single(char *str)
 	return (0);
 }
 
-void	*remove_if(t_cmd_info **node, t_cmd_info **head)
+void	*remove_if(t_cmd_info **node, t_table *table)
 {
-	char	**tmp;
-	char	*ret;
-	int		i;
+	int				i;
+	t_remove_vaild	d;
+	t_cmd_info		tmp2;
 
-	tmp = ft_split_divid_quote((*node)->data, "");
+	d.tmp = ft_split_divid_quote((*node)->data, "");
 	i = -1;
+	d.flag2 = 0;
 	(*node)->heredoc_flag = unexpect_token;
-	while (tmp[++i])
+	while (d.tmp[++i])
 	{
-		tmp[i] = remove_env_dquote_2(&tmp[i]);
-		if ((get_cmd_type(tmp[i]) == dquote || get_cmd_type(tmp[i]) == quote) \
-		&& remain_single(tmp[i]))
-		{
-			if ((*node)->type == redict_in)
-				(*node)->heredoc_flag = special_heredoc;
-			ret = ft_substr(tmp[i], 1, ft_strlen(tmp[i]) - 2);
-			free(tmp[i]);
-			tmp[i] = ret;
-		}
-		else
-			divid_env_valid(tmp[i], node, head);
+		d.flag = 0;
+		d.tmp[i] = remove_env_dquote_2(&d.tmp[i]);
+		if ((get_cmd_type(d.tmp[i]) == dquote \
+		|| get_cmd_type(d.tmp[i]) == quote) \
+		&& remain_single(d.tmp[i]))
+			remove_quote_or_dquote(&d, node, i);
+		tmp2.data = d.tmp[i];
+		if (d.flag != 1 && (*node)->type != redict_in)
+			re_place_get(&d, table, &tmp2, i);
+		if (!d.flag)
+			divid_env_valid(d.tmp[i], node, &(d.flag2));
 	}
-	link_quote(node, tmp);
-	return (free_split(tmp));
+	link_quote(node, d.tmp, d.flag2);
+	return (free_split(d.tmp));
 }
 
-void	remove_dquote(t_cmd_info **node)
+void	remove_dquote(t_cmd_info **node, t_table *table)
 {
 	int			i;
 	t_cmd_info	*head;
@@ -115,7 +117,7 @@ void	remove_dquote(t_cmd_info **node)
 		head = node[i];
 		while (node[i])
 		{
-			remove_if(&node[i], &head);
+			remove_if(&node[i], table);
 			node[i] = node[i]->next;
 		}
 		node[i] = head;

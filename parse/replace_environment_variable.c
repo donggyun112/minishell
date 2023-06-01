@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:49:14 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 16:20:20 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 19:55:01 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ char	*replace_val2(t_replace *d, int len)
 	return (d->tmp);
 }
 
-char	*replace_val(t_cmd_info	*node, t_table *table)
+char	*replace_val(t_cmd_info	*node, t_table *table, int flag)
 {
 	t_replace	d;
 	int			len;
@@ -75,7 +75,7 @@ char	*replace_val(t_cmd_info	*node, t_table *table)
 	d.ret = ft_strdup("");
 	while (1)
 	{
-		d.tmp = ft_strchr_skip_quote(d.base, '$');
+		d.tmp = ft_strchr_skip_quote(d.base, '$', flag);
 		if (i++ == 0 && (!(d.tmp) || !*(d.tmp + 1)))
 			return (free_return_null(&d));
 		len = env_len(d.tmp, table);
@@ -88,31 +88,5 @@ char	*replace_val(t_cmd_info	*node, t_table *table)
 		if (len != 0)
 			replace_val3(&d, table);
 		replace_val4(&d, len);
-	}
-}
-
-void	replace_environment_variable(t_cmd_info	**node, t_table *table)
-{
-	int			i;
-	char		*tmp;
-	t_cmd_info	*head;
-
-	i = 0;
-	while (node[i])
-	{
-		head = node[i];
-		tmp = NULL;
-		while (node[i])
-		{
-			tmp = replace_val(node[i], table);
-			if (tmp && node[i]->type != quote)
-			{
-				free(node[i]->data);
-				node[i]->data = tmp;
-			}
-			node[i] = node[i]->next;
-		}
-		node[i] = head;
-		i++;
 	}
 }
