@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 19:55:43 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 20:42:27 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -321,7 +321,9 @@ int				check_d(char *tmp, int i, char tar);
 
 // remove
 
-void			remove_quote_or_dquote(t_remove_vaild *d, t_cmd_info **node, int i);
-void			re_place_get(t_remove_vaild	*d, t_table *table, t_cmd_info *tmp2, int i);
+void			remove_quote_or_dquote(t_remove_vaild *d, \
+t_cmd_info **node, int i);
+void			re_place_get(t_remove_vaild	*d, \
+t_table *table, t_cmd_info *tmp2, int i);
 
 #endif
