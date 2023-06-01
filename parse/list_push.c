@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/31 21:48:13 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 20:31:26 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/01 20:40:28 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,13 +87,13 @@ char *data, int num)
 		return ;
 	}
 	head = (*node);
-	/* while (num-- > 1)
-		head = head->next; */
-	tmp2 = head;
+	while (num-- > 1)
+		head = head->next;
+	tmp2 = head->next;
 	tmp = (t_cmd_info *)malloc(sizeof(t_cmd_info));
 	tmp->data = data;
-	tmp->type = get_cmd_type(data);
+	tmp->type = argv;
 	tmp->heredoc_flag = unexpect_token;
 	tmp->next = tmp2;
-	(*node)->next = tmp;
+	head->next = tmp;
 }
