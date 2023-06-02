@@ -1,14 +1,12 @@
 NAME 	= minishell
 CC = cc
-CFLAGS = -Wall -Wextra -Werror  -fsanitize=address -g3
+CFLAGS = -Wall -Wextra -Werror
 
 # NOTE: Add files
 
 # excute 폴더 안에 실행파일 나누어서 넣어주시면 되고 헤더는 ../minishell.h로 맞춰주세요
 # ================================================
 SRC 								= 	minishell \
-										excute/execute \
-										excute/ft_exit \
 										new_split/ft_split_divid_quote \
 										new_split/ft_split_divid_utils \
 										new_split/ft_split_divid_utils2 \
@@ -41,6 +39,19 @@ SRC 								= 	minishell \
 										utils/get_next_line_utils \
 										utils/minishell_error_handle \
 										signal/signal \
+										execute/execute \
+										execute/ft_exit \
+										execute/builtin_cd \
+										execute/builtin_echo \
+										execute/builtin_export_add \
+										execute/builtin_export_print \
+										execute/builtin_export \
+										execute/builtin_unset \
+										execute/builtin \
+										execute/exec_exit \
+										execute/exec_process \
+										execute/exec_utils \
+										execute/pipe_sequence \
 # ================================================
 
 SRC_CUR = $(addsuffix .c, $(SRC))
@@ -87,7 +98,7 @@ $(NAME) : $(OBJ) $(HEAD)
 	@$(eval CURRENT_FILE=$(shell echo $$(($(CURRENT_FILE)+1))))
 
 clean :
-	@rm -rf new_split/*.o parse/*.o signal/*.o utils/*.o *.o all bonus libft.a
+	@rm -rf new_split/*.o parse/*.o signal/*.o utils/*.o execute/*.o *.o all bonus libft.a
 	@printf "$(LF)🚧 $(Yellow)Cleaning...🚨 $(Purple)$(NAME)$(White) $(OBJ) \n$(DEF_COLOR) "
 	@make clean -C $(LIBFT)
 

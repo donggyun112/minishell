@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 20:42:27 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/02 16:04:56 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include "libft/libft.h"
 # include <stdlib.h>
 # include <termios.h>
+# include <sys/stat.h>
 
 # define PATH 0
 # define CMD 1
@@ -275,6 +276,7 @@ char			*vaild_check(int i, char **base);
 int				check_quote_heredoc(char *line);
 
 // minishell_utils2
+
 int				ft_strcmp(char *s1, char *s2);
 int				check_whitespace(const char *command);
 char			**copy_env(char **env);
@@ -291,6 +293,7 @@ void			errno_print(const char *str, t_table *table, t_fd_status *fd);
 void			close_file(t_cmd_info *node, t_fd_status *fd);
 
 // set_
+
 void			push_heredoc_fd(t_heredoc_fd **h_fd, int fd);
 void			push_cmd(t_cmd_info **cmd, char *data, int type);
 void			set_table(t_table *table);
@@ -303,13 +306,12 @@ t_cmd_info		**set_cmd_list(t_table *table, t_tmp *list);
 void			rl_replace_line(const char *text, int clear_undo);
 
 // set2
+
 void			check_sig(int fd, t_table *table);
 void			init_env_and_exit_status(t_table *table, char **env);
 
-//execute
-char			*ft_getenv(char *name, char **envp);
-void			execute(t_command **cmd, t_table *table);
-//split_env_valid
+// split_env_valid
+
 void			push_front_t_cmd_info(t_cmd_info **node, \
 char *data, int num);
 void			divid_env_valid(char *str, \
@@ -325,5 +327,57 @@ void			remove_quote_or_dquote(t_remove_vaild *d, \
 t_cmd_info **node, int i);
 void			re_place_get(t_remove_vaild	*d, \
 t_table *table, t_cmd_info *tmp2, int i);
+
+// execute
+
+char			*set_exec_path(char ***envp_addr, char **cmd);
+void			execute(t_command **cmd, t_table *table);
+
+// exec_exit
+
+void			exit_processor_error(t_command **cmd);
+void			exit_access_error(char *file, int err_stat);
+void			exit_no_exec_file(char *path);
+
+// exec_utils
+
+char			*ft_getenv(char *name, char **envp);
+char			*link_path(char *path, char *cmd);
+void			free_strarr(char **path);
+int				get_env_size(char **envp);
+void			reset_fd(t_fd *fds);
+
+// builtin
+
+int				run_builtin(pid_t pid, t_command *tmp, t_table *table);
+int				check_builtin(t_command *tmp);
+
+// builtin echo
+
+int				echo_option_n(char *option);
+int				builtin_echo(t_command *tmp);
+
+// builtin cd
+
+void			mod_envp(char *name, char *value, char **envp);
+int				builtin_cd(t_command *tmp, char ***envp_addr);
+
+// builtin unset
+
+int				builtin_unset(char **cmd, char ***envp_addr);
+
+// builtin export
+
+int				print_export(char **envp);
+void			add_env_list(char *cmd, char end, char ***envp_addr);
+int				builtin_export(t_command *tmp, char ***envp_addr);
+
+// exec process
+
+void			exec_cmd(pid_t pid, t_fd *fds, t_command *tmp, t_table *table);
+
+// pipe sequence
+
+void			pipe_sequence(pid_t pid, t_command *tmp, t_fd *fds);
 
 #endif
