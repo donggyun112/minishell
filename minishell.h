@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
+/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/02 16:22:22 by jinhyeop         ###   ########.fr       */
+/*   Updated: 2023/06/02 17:11:53 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,6 +105,7 @@ typedef struct s_remove_vaild
 	char		*tmp3;
 	int			flag;
 	int			flag2;
+	int			flag3;
 }	t_remove_vaild;
 
 typedef enum s_type
@@ -179,7 +180,7 @@ void			push_tmp(t_tmp **list, char *data);
 // syntax_interpretation
 
 int				get_cmd_type(char *cmd);
-char			*remove_env_dquote(char *tmp);
+char			*remove_env_dquote(char *tmp, int *flag);
 t_cmd_info		**syntax_interpretation(t_tmp *list, t_table *table);
 int				check_operator(int type);
 int				check_unexpect_operator(t_tmp **list, t_table *table);
@@ -210,7 +211,7 @@ char			*replace_val(t_cmd_info	*node, t_table *table, int flag);
 
 // remove_quote
 
-char			*remove_env_dquote_2(char **base);
+char			*remove_env_dquote_2(char **base, int *flag);
 void			*remove_if(t_cmd_info **node, t_table *table);
 void			remove_dquote(t_cmd_info **node, t_table *table);
 void			link_quote(t_cmd_info **node, char **tmp, int flag);

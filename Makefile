@@ -1,10 +1,9 @@
 NAME 	= minishell
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g3
 
 # NOTE: Add files
 
-# excute 폴더 안에 실행파일 나누어서 넣어주시면 되고 헤더는 ../minishell.h로 맞춰주세요
 # ================================================
 SRC 								= 	minishell \
 										new_split/ft_split_divid_quote \

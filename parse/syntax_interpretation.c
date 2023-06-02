@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:41:10 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 18:18:20 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/02 17:11:39 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ int	get_cmd_type(char *cmd)
 	return (argv);
 }
 
-char	*remove_env_dquote(char *tmp)
+char	*remove_env_dquote(char *tmp, int *flag)
 {
 	int		i;
 	char	*ret;
@@ -79,6 +79,7 @@ char	*remove_env_dquote(char *tmp)
 			return (NULL);
 		ret = ft_substr(&tmp[i + 2], 0, ft_strlen(&tmp[i + 2]) - 1);
 		free(tmp);
+		*flag = 1;
 		return (ret);
 	}
 	return (NULL);

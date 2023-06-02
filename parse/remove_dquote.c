@@ -6,7 +6,7 @@
 /*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:53:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/01 19:54:02 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/02 17:11:23 by dongkseo         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void	link_quote(t_cmd_info **node, char **tmp, int flag)
 	(*node)->data = ret;
 }
 
-char	*remove_env_dquote_2(char **base)
+char	*remove_env_dquote_2(char **base, int *flag)
 {
 	int		i;
 	char	*tmp;
@@ -45,7 +45,7 @@ char	*remove_env_dquote_2(char **base)
 		return (tmp);
 	if (get_cmd_type(tmp) == quote)
 		return (tmp);
-	tmp2 = remove_env_dquote(tmp);
+	tmp2 = remove_env_dquote(tmp, flag);
 	if (tmp2)
 		return (tmp2);
 	while (tmp[i + 1])
@@ -91,7 +91,8 @@ void	*remove_if(t_cmd_info **node, t_table *table)
 	while (d.tmp[++i])
 	{
 		d.flag = 0;
-		d.tmp[i] = remove_env_dquote_2(&d.tmp[i]);
+		d.flag3 = 0;
+		d.tmp[i] = remove_env_dquote_2(&d.tmp[i], &(d.flag3));
 		if ((get_cmd_type(d.tmp[i]) == dquote \
 		|| get_cmd_type(d.tmp[i]) == quote) \
 		&& remain_single(d.tmp[i]))
@@ -99,7 +100,7 @@ void	*remove_if(t_cmd_info **node, t_table *table)
 		tmp2.data = d.tmp[i];
 		if (d.flag != 1 && (*node)->type != redict_in)
 			re_place_get(&d, table, &tmp2, i);
-		if (!d.flag)
+		if (!d.flag && !d.flag3)
 			divid_env_valid(d.tmp[i], node, &(d.flag2));
 	}
 	link_quote(node, d.tmp, d.flag2);
