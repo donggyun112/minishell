@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split_divid_utils.c                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <student.42seoul.kr>              +#+  +:+       +#+        */
+/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:22:44 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/02 00:55:32 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/06/02 16:43:51 by jinhyeop         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,8 +73,6 @@ int	quote_len(char const *s, char *c)
 	else if (s[i] == '\"')
 	{
 		i++;
-		/* if (s[i] == '\"')
-			i++; */
 		while (s[i] && s[i] != '\"')
 			i++;
 		if (!s[i])
