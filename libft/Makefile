@@ -33,7 +33,7 @@ CURRENT_FILE = 1
 
 progress_bar = printf "$(LF)$(Cyan)[$(1)/$(2)]$(DEF_COLOR) [$(Yellow)%0.1f%%$(DEF_COLOR)] $(DEF_COLOR)\b" $(shell echo "scale=1; ($(1) / $(2)) * 100" | bc); \
 		printf " [%-*s%s]" 25 "$(shell printf '%0.*s' $$(($(1) * 25 / $(2))) '=========================================================================')>" ""; \
-		printf "$(DEF_COLOR) $(Green)🔰Compiling... $(NAME)$(DEF_COLOR)" \
+		printf "$(DEF_COLOR) $(Green)🔰Compiling... $(NAME)$(DEF_COLOR) | $(Cyan) $<  $(DEF_COLOR)" \
 		sleep 1
 
 all : $(NAME) $(HEAD)
