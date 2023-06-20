@@ -75,7 +75,7 @@ CURRENT_FILE = 1
 
 progress_bar = printf "$(LF)$(Cyan)[$(1)/$(2)]$(DEF_COLOR) [$(Yellow)%0.1f%%$(DEF_COLOR)] $(DEF_COLOR)\b" $(shell echo "scale=1; ($(1) / $(2)) * 100" | bc); \
 		printf " [%-*s%s]" 25 "$(shell printf '%0.*s' $$(($(1) * 25 / $(2))) '=========================================================================')>" ""; \
-		printf "\n\033[2K$(DEF_COLOR)$(Gray)Compiling...  $< $(DEF_COLOR) \033[A\033[999C\e[?25l" \
+		printf "\n\033[2K$(DEF_COLOR)  ✔︎ $(Cyan)Compiling... $< $(DEF_COLOR) \033[A\033[999C\e[?25l" \
 
 all : $(NAME)
 
@@ -84,7 +84,7 @@ $(NAME) : $(OBJ) $(HEAD)
 	@mv libft/libft.a ./
 	@$(CC) $(CFLAGS) -I $(HEAD) -L../readline -lreadline -lncurses -lhistory libft.a $(OBJ) -o $(NAME)
 	@printf "$(LF)"
-	@printf "\n\033[1;32mCompilation complete. $(NAME) has been created.\033[0m\n\n \e[?25h"
+	@printf "\n\033[1;32m✅ Compilation complete. $(NAME) has been created. ✅\033[0m\n\n\e[?25h"
 
 	@echo "$(Green)==================================================$(DEF_COLOR)"
 	@echo "$(Green)|        🥳  minishell compile succsess. 🥳       |$(DEF_COLOR)"
@@ -105,7 +105,10 @@ clean :
 
 fclean : clean
 	@printf "$(LF)🚧 $(Red)Cleaning...🚨 $(White)$(NAME) \n"
+	@echo "$(Cyan)Clearing terminal in [3seconds]...$(DEFAULT_COLOR)"
 	@rm -rf $(NAME)
+	@sleep 1
+	@clear
 	@printf "\e[?25h"
 
 re :
