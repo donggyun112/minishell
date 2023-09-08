@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: seodong-gyun <seodong-gyun@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 20:32:24 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/06/19 17:19:59 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/09/09 02:36:38 by seodong-gyu      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,8 @@ const char		*quote_string(const char *s);
 int				word_count__(char const *s, char *c);
 char			**ft_split_divid_quote(char const *s, char *c);
 const char		*quote_string2(const char *s, char tar);
+int				word_count__(char const *s, char *c);
+
 
 // split_operator
 

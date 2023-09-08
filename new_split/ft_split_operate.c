@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split_operate.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: seodong-gyun <seodong-gyun@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/14 16:42:41 by dongkseo          #+#    #+#             */
-/*   Updated: 2023/05/31 21:51:55 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/09/09 02:47:38 by seodong-gyu      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,12 +65,15 @@ char	**ft_putstring_(char const *s, char *c, char **arr)
 
 const char	*word_count_di(const char *s, char *c)
 {
+	char	sep;
+
 	while (*s && is_exist__(*s, c) && !divid_cmd(s))
 	{
-		if (!is_quote_re(*s))
+		if (*s == '\"' || *s == '\'')
 		{
+			sep = *s;
 			s++;
-			while (*s && is_quote_re(*s))
+			while (*s && *s != sep)
 				s++;
 			if (!*s)
 				return (s);
