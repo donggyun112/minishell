@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   here_doc2.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dongkseo <dongkseo@student.42.fr>          +#+  +:+       +#+        */
+/*   By: seodong-gyun <seodong-gyun@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/01 19:28:09 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/06/01 19:46:56 by dongkseo         ###   ########.fr       */
+/*   Updated: 2023/10/12 05:53:38 by seodong-gyu      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,15 @@ char	*create_filename(void)
 	return (path);
 }
 
+int cmp_herdoc_limit_check(char *str1, char *str2)
+{
+	int	val;
+	char *line = ft_substr(str1, 0, ft_strlen(str1) - 1);
+	val = ft_strcmp(line, str2);
+	free(line);
+	return (val);
+}
+
 void	until_here_doc_end(char *limits, t_table *table, int infile, int type)
 {
 	char	*line;
@@ -62,7 +71,7 @@ void	until_here_doc_end(char *limits, t_table *table, int infile, int type)
 	{
 		line = get_next_line(0);
 		if (!line || (line[0] != '\n'
-				&& ft_strncmp(line, limits, ft_strlen(line) - 1) == 0))
+				&& cmp_herdoc_limit_check(line, limits) == 0))
 		{
 			free(line);
 			break ;

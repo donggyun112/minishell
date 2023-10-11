@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec_exit.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jinhyeop <jinhyeop@student.42seoul.kr>     +#+  +:+       +#+        */
+/*   By: seodong-gyun <seodong-gyun@student.42.f    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/02 15:27:41 by jinhyeop          #+#    #+#             */
-/*   Updated: 2023/06/02 15:50:22 by jinhyeop         ###   ########.fr       */
+/*   Updated: 2023/09/09 03:00:55 by seodong-gyu      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void	exit_no_exec_file(char *path)
 	}
 	else if (ft_strcmp(path, "..") == 0)
 	{
-		ft_putendl_fd("minishell: ..: command not found", 2);
+		ft_putendl_fd("minishellt: ..: command not found", 2);
 		exit(1);
 	}
 	else if (ft_strcmp(path, "/") == 0)
