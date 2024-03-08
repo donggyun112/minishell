@@ -80,6 +80,13 @@ progress_bar = printf "$(LF)$(Cyan)[$(1)/$(2)]$(DEF_COLOR) [$(Yellow)%0.1f%%$(DE
 all : $(NAME)
 
 $(NAME) : $(OBJ) $(HEAD)
+	@if [ ! -d "../readline" ]; then \
+		cp -r readline ../; \
+		echo "readline directory copied to parent directory."; \
+	else \
+		echo "readline directory already exists in the parent directory."; \
+	fi
+	make -C ../readline
 	@make -C $(LIBFT)
 	@mv libft/libft.a ./
 	@$(CC) $(CFLAGS) -I $(HEAD) -L../readline -lreadline -lncurses -lhistory libft.a $(OBJ) -o $(NAME)
@@ -102,6 +109,7 @@ clean :
 	@rm -rf new_split/*.o parse/*.o signal/*.o utils/*.o execute/*.o *.o all bonus libft.a
 	@printf "$(LF)🚧 $(Yellow)Cleaning...🚨 $(Purple)$(NAME)$(White) $(OBJ) \n$(DEF_COLOR) "
 	@make clean -C $(LIBFT)
+	@make clean -C ../readline
 
 fclean : clean
 	@printf "$(LF)🚧 $(Red)Cleaning...🚨 $(White)$(NAME) \n"
@@ -109,6 +117,7 @@ fclean : clean
 	@rm -rf $(NAME)
 	@sleep 1
 	@clear
+	@rm -rf ../readline
 	@printf "\e[?25h"
 
 re :
